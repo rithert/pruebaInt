@@ -13,7 +13,7 @@ Plataforma financiera digital, sin atención física, construida en **Flutter** 
 
 ```
 apps/super_app/          Shell: compone los módulos de dominio
-packages/core/           Red y resiliencia, almacenamiento, observabilidad, flags
+packages/core/           Red y resiliencia, caché offline (Drift), sesión, observabilidad, contrato de módulos
 packages/design_system/  Tokens, tema y componentes accesibles
 backend/                 BFF (Fastify + TypeScript + SQLite)
 docs/                    Arquitectura, ADRs, operación, uso de IA
@@ -23,28 +23,38 @@ docs/                    Arquitectura, ADRs, operación, uso de IA
 
 | Herramienta | Versión |
 |---|---|
-| Flutter | 3.35.x (Dart 3.9) |
+| Flutter | 3.47.6 (Dart 3.13), fijada en [`.fvmrc`](.fvmrc) |
+| [FVM](https://fvm.app) | 4.x |
 | Node.js | 24.x |
 | Android SDK + emulador | API 33 o superior |
+
+La versión de Flutter se gestiona con FVM: el proyecto usa la versión fijada sin tocar el Flutter global. El CI lee el mismo `.fvmrc`. Si prefieres no usar FVM, instala Flutter 3.47.6 y omite el prefijo `fvm` en los comandos.
 
 ## Puesta en marcha
 
 ```bash
+# 0. SDK de Flutter del proyecto (agrega %LOCALAPPDATA%\Pub\Cache\bin al PATH)
+dart pub global activate fvm
+fvm install                      # descarga la versión de .fvmrc
+
 # 1. Dependencias de Flutter (todo el workspace de una vez) y runner de scripts
-flutter pub get
-dart pub global activate melos   # agrega %LOCALAPPDATA%\Pub\Cache\bin al PATH
+fvm flutter pub get
+dart pub global activate melos
 
 # 2. Backend
 cd backend
 npm install
 npm run dev          # http://localhost:3000/health
 
-# 3. App (en otra terminal, con el emulador abierto)
+# 3. App (en otra terminal, con el teléfono conectado por USB o el emulador abierto)
+adb reverse tcp:3000 tcp:3000   # el localhost:3000 del dispositivo apunta al PC
 cd apps/super_app
-flutter run          # usa http://10.0.2.2:3000 por defecto
+fvm flutter run                 # usa http://localhost:3000 por defecto
 ```
 
-Para apuntar la app a otro backend: `flutter run --dart-define=API_BASE_URL=https://mi-bff.example.com`.
+> `adb reverse` se pierde al desconectar el cable o reiniciar adb: si la app muestra "Sin conexión", vuelve a ejecutarlo. Para un teléfono físico, activa **Opciones de desarrollador → Depuración por USB** y acepta la huella del PC al conectarlo.
+
+Para apuntar la app a otro backend: `fvm flutter run --dart-define=API_BASE_URL=https://mi-bff.example.com`.
 
 ## Pruebas
 

@@ -36,3 +36,7 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 !.vscode/launch.json
+!.vscode/settings.json
+
+# FVM Version Cache
+.fvm/
