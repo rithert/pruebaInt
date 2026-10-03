@@ -10,13 +10,14 @@ class AppEnvironment {
     required this.enableDebugTools,
   });
 
-  /// Lee los valores definidos al compilar. Por defecto apunta al backend
-  /// local visto desde el emulador Android (10.0.2.2 = localhost del host).
+  /// Lee los valores definidos al compilar. Por defecto apunta al BFF local
+  /// a través de `adb reverse tcp:3000 tcp:3000`, que redirige el puerto del
+  /// dispositivo (físico o emulador) al PC por USB.
   factory AppEnvironment.fromDefines() => const AppEnvironment(
     name: String.fromEnvironment('ENV', defaultValue: 'dev'),
     apiBaseUrl: String.fromEnvironment(
       'API_BASE_URL',
-      defaultValue: 'http://10.0.2.2:3000',
+      defaultValue: 'http://localhost:3000',
     ),
     enableDebugTools: bool.fromEnvironment(
       'ENABLE_DEBUG_TOOLS',
