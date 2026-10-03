@@ -47,4 +47,5 @@ melos run analyze          # análisis estático
 melos run format:check     # formato
 melos run test             # tests de todos los paquetes
 (cd backend && npm test)            # tests del BFF
+(cd backend && npm run format)      # formatea el BFF con Prettier (el CI lo verifica)
 ```
