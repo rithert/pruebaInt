@@ -1,6 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- La plantilla de Flutter solo declara INTERNET en debug/profile: sin
+         esto el APK de release no tendría red. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- connectivity_plus: detectar cambios de red para el modo offline. -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+
     <application
-        android:label="super_app"
+        android:label="Super App"
+        android:allowBackup="false"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

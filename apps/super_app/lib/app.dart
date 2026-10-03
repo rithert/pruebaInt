@@ -1,22 +1,22 @@
-import 'package:core/core.dart';
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-/// Raíz de la aplicación (shell). Compone los módulos de dominio; en F2 se
-/// incorporan router, inyección de dependencias y observabilidad.
+/// Raíz de la aplicación (shell). Solo aplica tema y router: la lógica de
+/// cada dominio vive en su módulo.
 class SuperApp extends StatelessWidget {
-  const SuperApp({required this.environment, super.key});
+  const SuperApp({required this.router, super.key});
 
-  final AppEnvironment environment;
+  final GoRouter router;
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Super App Financiera',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
-      home: Scaffold(body: Center(child: Text('Entorno: ${environment.name}'))),
+      routerConfig: router,
     );
   }
 }
