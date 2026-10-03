@@ -54,6 +54,26 @@ melos run analyze  # análisis estático
 cd backend && npm test      # tests del BFF
 ```
 
+## API del BFF
+
+Todas las respuestas de error usan el formato `{ error: { code, message, correlationId } }`.
+
+| Método | Ruta | Auth | Descripción |
+|---|---|---|---|
+| POST | `/v1/auth/register` | — | Onboarding: crea el cliente, sus productos e historial |
+| POST | `/v1/auth/login` | — | Inicia sesión |
+| POST | `/v1/auth/refresh` | — | Rota el refresh token y emite una sesión nueva |
+| POST | `/v1/auth/logout` | — | Revoca la sesión |
+| GET | `/v1/me` | Bearer | Perfil y segmento del cliente |
+| GET | `/v1/accounts` | Bearer | Cuentas, saldos y totales |
+| GET | `/v1/accounts/:id/transactions` | Bearer | Movimientos paginados por cursor (`limit`, `cursor`, `category`) |
+| GET | `/v1/transactions/:id` | Bearer | Detalle de un movimiento |
+| POST | `/v1/transfers` | Bearer + `Idempotency-Key` | Transferencia entre cuentas propias |
+| POST | `/admin/activity/tick` | `x-admin-key` | Fuerza un movimiento (demo de push) |
+| GET/PUT/DELETE | `/admin/chaos` | `x-admin-key` | Inyección de latencia, errores y caídas por servicio |
+
+La configuración del backend está en [backend/.env.example](backend/.env.example).
+
 ## Documentación
 
 - [Guía de colaboración y Trunk Based Development](CONTRIBUTING.md)

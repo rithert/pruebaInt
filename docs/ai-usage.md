@@ -1,35 +1,55 @@
 # Uso de herramientas de IA en el desarrollo
 
+## Enfoque: el desarrollador dirige, la IA ejecuta
+
+Usé la IA como **par de programación con roles definidos**:
+
+| Responsabilidad | Desarrollador | IA |
+|---|---|---|
+| Alcance, prioridades y plazos | ✅ decide | Propone opciones |
+| Decisiones de arquitectura (ADRs) | ✅ elige entre alternativas | Presenta alternativas y trade-offs |
+| Código de piezas críticas | ✅ escribe o reescribe | Revisa y sugiere |
+| Boilerplate, configuración, scaffolding | Revisa | ✅ genera |
+| Tests | Define los casos críticos | ✅ amplía la cobertura |
+| Documentación | Valida el contenido | ✅ redacta borradores |
+| Control de versiones (commits, historial TBD) | ✅ exclusivo | Sin acceso de escritura a git |
+
 ## Herramientas
 
-| Herramienta | Uso principal |
+| Herramienta | Uso |
 |---|---|
-| Claude Code (Claude Opus 5.5) en VS Code | Análisis del enunciado, planificación, scaffolding, implementación asistida, tests y documentación |
+| Claude Code (Claude Opus 5.5) en VS Code | Planificación, scaffolding, implementación asistida, tests y documentación |
 
-## Principios de uso
+## Bitácora de decisiones y delegación
 
-1. **La IA propone y el desarrollador decide.** Las decisiones de arquitectura (ADRs) se discuten y las aprueba el desarrollador antes de implementarlas.
-2. **Todo lo generado se verifica** con análisis estático, tests y ejecución real antes de integrarse a `main`.
-3. **Los commits los hace el desarrollador** tras revisar el diff. La IA no tiene permiso de escritura sobre git.
-4. **Sin secretos ni datos personales** en los prompts.
+Cada fila registra **qué decidí, qué delegué y dónde intervine**. Las correcciones y los rechazos se anotan tal como ocurrieron.
 
-## Bitácora
+| Fecha | Fase | Objetivo / decisión (desarrollador) | Delegado a la IA | Intervención del desarrollador | Verificación |
+|---|---|---|---|---|---|
+| 2026-10-03 | Análisis | Fijé el plazo (2,5 días) y elegí: BFF en Node + TS (entre Firebase, Dart y Node), solo Android, Bloc/Cubit | Desglose del enunciado en requisitos explícitos e implícitos; borrador del plan MoSCoW | Definí el stack y el alcance; acoté las plataformas según los dispositivos disponibles | — |
+| 2026-10-03 | Proceso | Los commits los hago yo, para controlar el historial TBD y la autoría | — | Le quité a la IA el permiso de escritura sobre git | — |
+| 2026-10-03 | F0 Fundaciones | Monorepo modular (ADR-0001) y BFF (ADR-0002) | Scaffolding del workspace, lints, CI, esqueleto del BFF, borradores de ADRs | Revisión de la estructura y commits manuales | `dart analyze` sin issues; 5 tests Flutter + 3 del BFF en verde. Al ejecutar se detectó que los scripts de melos requerían instalación global; se corrigió antes de integrar |
+| 2026-10-03 | F1 Backend | Elegí entre 3 alternativas en cada punto: sesiones JWT + refresh rotativo, segmento por onboarding + comportamiento, datos con generador + motor de actividad (ADR-0003, ADR-0004) | Implementación de auth, cuentas, transferencias idempotentes, generador y motor; 45 tests | Me reservé el middleware de chaos: la IA solo dejó el contrato y los tests como especificación; la implementación queda a mi cargo _(actualizar al terminarla)_ | Los tests detectaron un bug real (los correos con espacios del autocompletado eran rechazados). La prueba de humo por HTTP detectó que el disparo manual del motor podía no generar movimiento; se corrigió con un test de regresión |
+| 2026-10-03 | Proceso | Rediseñé esta bitácora y el modo de trabajo: yo elijo el diseño antes de cada fase y escribo piezas clave | — | La primera versión centraba la bitácora en lo que hacía la IA; la reorienté a decisiones y delegación | — |
 
-| Fecha | Fase | Qué hizo la IA | Qué revisó o corrigió el desarrollador | Impacto |
-|---|---|---|---|---|
-| 2026-10-03 | Análisis | Desglosó el enunciado en requisitos explícitos e implícitos (backend real, SDUI, chaos testing) y propuso un plan MoSCoW ajustado a 2,5 días | Definió plazo, stack del backend, plataforma (Android) y gestor de estado | Plan priorizado en minutos; se detectó temprano el riesgo de "solo datos simulados" |
-| 2026-10-03 | F0 Fundaciones | Generó el monorepo (pub workspaces), lints estrictos, CI con filtros por ruta, BFF base con correlation-id, ADRs 0001-0002 | Revisión de estructura y convenciones | Fundaciones listas con CI en verde desde el primer commit |
+## Dónde no delegué en la IA
+
+- Elección de alcance y priorización ante el plazo.
+- Decisiones de arquitectura: la IA presenta alternativas, yo elijo.
+- Commits e historial de versiones.
+- Validación manual en el emulador y guion de la demostración.
 
 ## Métricas de impacto
 
 > Se completan al cierre de la prueba.
 
 - **Productividad:** _pendiente_
-- **Calidad** (defectos detectados por los tests o la revisión en código generado): _pendiente_
+- **Calidad** (defectos detectados por tests o revisión en código generado): _pendiente_
 - **Documentación:** _pendiente_
 - **Pruebas:** _pendiente_
 
 ## Riesgos observados y mitigación
 
-- *Código plausible pero incorrecto:* mitigado con tests y análisis estático estricto (`strict-casts`, `strict-inference`).
-- *Dependencias inventadas o desactualizadas:* se verifican las versiones reales al instalar (`npm ls`, `flutter pub get`).
+- *Código plausible pero incorrecto:* tests obligatorios y análisis estático estricto (`strict-casts`, `strict-inference`).
+- *Dependencias inventadas o desactualizadas:* se verifican las versiones reales al instalar (`npm ls`, `pubspec.lock`).
+- *Pérdida de comprensión del código:* cada fase cierra con una explicación del diseño y las piezas críticas las escribo yo.
