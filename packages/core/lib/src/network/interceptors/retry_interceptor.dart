@@ -1,7 +1,3 @@
-// TEMPORAL: los campos se usan al implementar onError. Quitar esta línea
-// junto con la implementación.
-// ignore_for_file: unused_field
-
 import 'dart:math' as math;
 
 import 'package:dio/dio.dart';
@@ -28,9 +24,6 @@ class RetryPolicy {
 ///
 /// Especificación completa: test/network/retry_interceptor_test.dart
 /// (`fvm flutter test test/network/retry_interceptor_test.dart` en packages/core).
-///
-/// Mientras no esté implementado, el interceptor deja pasar los errores sin
-/// reintentar (la app funciona, pero sin esta capa de resiliencia).
 class RetryInterceptor extends Interceptor {
   RetryInterceptor({
     required this._dio,
@@ -59,7 +52,58 @@ class RetryInterceptor extends Interceptor {
   /// 4. Es transitorio: timeouts (connection/send/receive), `connectionError`
   ///    o respuesta 502/503/504.
   bool shouldRetry(DioException error) {
-    throw UnimplementedError('TODO: implementar shouldRetry');
+    final extra = error.requestOptions.extra;
+
+    // 1. Verificar si está desactivado
+    if (extra[disableKey] == true) {
+      return false;
+    }
+
+    // 2. Verificar intentos restantes
+    if (_attemptOf(error.requestOptions) + 1 >= policy.maxAttempts) {
+      return false;
+    }
+
+    // 3. Verificar idempotencia
+    if (!_isIdempotent(error.requestOptions)) {
+      return false;
+    }
+
+    // 4. Verificar si es error transitorio
+    return _isTransient(error);
+  }
+
+  /// Número de reintento ya realizado (0 = primer intento).
+  static int _attemptOf(RequestOptions options) =>
+      (options.extra[attemptKey] as int?) ?? 0;
+
+  bool _isIdempotent(RequestOptions options) {
+    const idempotentMethods = {'GET', 'HEAD', 'PUT', 'DELETE', 'OPTIONS'};
+    final method = options.method.toUpperCase();
+
+    if (idempotentMethods.contains(method)) {
+      return true;
+    }
+
+    // Comprobar si existe el header 'Idempotency-Key' ignorando mayúsculas/minúsculas
+    return options.headers.keys.any(
+      (key) => key.toLowerCase() == 'idempotency-key',
+    );
+  }
+
+  bool _isTransient(DioException error) {
+    switch (error.type) {
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.sendTimeout:
+      case DioExceptionType.receiveTimeout:
+      case DioExceptionType.connectionError:
+        return true;
+      case DioExceptionType.badResponse:
+        final statusCode = error.response?.statusCode;
+        return statusCode == 502 || statusCode == 503 || statusCode == 504;
+      default:
+        return false;
+    }
   }
 
   /// Espera antes del reintento número [retryNumber] (1, 2, 3…).
@@ -67,25 +111,64 @@ class RetryInterceptor extends Interceptor {
   /// - Con [retryAfter] (header del servidor): se usa ese valor, con tope en
   ///   `policy.maxDelay`.
   /// - Sin él, "full jitter": `random() × min(maxDelay, baseDelay × 2^(n-1))`.
-  ///
-  /// Pista: `Duration` admite `*` por un número y `>` para comparar.
   Duration delayFor(int retryNumber, {Duration? retryAfter}) {
-    throw UnimplementedError('TODO: implementar delayFor');
+    if (retryAfter != null) {
+      return retryAfter > policy.maxDelay ? policy.maxDelay : retryAfter;
+    }
+
+    // Backoff exponencial: baseDelay * 2^(retryNumber - 1)
+    final exponentialFactor = math.pow(2, retryNumber - 1).toDouble();
+    final calculatedMs = policy.baseDelay.inMilliseconds * exponentialFactor;
+
+    final cappedMs = math.min(
+      policy.maxDelay.inMilliseconds.toDouble(),
+      calculatedMs,
+    );
+
+    // Full jitter: random() * cappedDelay
+    final jitteredMs = (_random.nextDouble() * cappedMs).round();
+    return Duration(milliseconds: jitteredMs);
   }
 
   /// Si [shouldRetry]: espera [delayFor] (leyendo `Retry-After` en segundos
   /// de la respuesta), incrementa `extra[attemptKey]` y repite la petición
   /// con `_dio.fetch(requestOptions)`. Si el reintento responde, se entrega
   /// con `handler.resolve`; si vuelve a fallar, con `handler.next`.
-  ///
-  /// Pista: cada `_dio.fetch` vuelve a pasar por este interceptor, así que
-  /// los reintentos sucesivos ocurren solos mientras queden intentos.
   @override
   Future<void> onError(
     DioException err,
     ErrorInterceptorHandler handler,
   ) async {
-    // TODO: implementar. Por ahora deja pasar el error sin reintentar.
-    handler.next(err);
+    if (!shouldRetry(err)) {
+      handler.next(err);
+      return;
+    }
+
+    final nextAttempt = _attemptOf(err.requestOptions) + 1;
+
+    // Extraer header Retry-After si viene en la respuesta
+    Duration? retryAfter;
+    final retryAfterHeader = err.response?.headers.value('retry-after');
+    if (retryAfterHeader != null) {
+      final seconds = int.tryParse(retryAfterHeader);
+      if (seconds != null) {
+        retryAfter = Duration(seconds: seconds);
+      }
+    }
+
+    final delay = delayFor(nextAttempt, retryAfter: retryAfter);
+    await _sleep(delay);
+
+    // Actualizar el número de intento en los extras
+    err.requestOptions.extra[attemptKey] = nextAttempt;
+
+    // `fetch` envuelve cualquier falla en DioException, por eso basta con
+    // capturar ese tipo: el error que se propaga es el del último intento.
+    try {
+      final response = await _dio.fetch<Object?>(err.requestOptions);
+      handler.resolve(response);
+    } on DioException catch (retryError) {
+      handler.next(retryError);
+    }
   }
 }

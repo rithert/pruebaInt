@@ -134,6 +134,11 @@ void main() {
     'si el refresh falla por red, NO cierra la sesión (se reintenta luego)',
     () async {
       adapter.enqueueError(401, 'token_expired');
+
+      final call = dio.get<Object?>('/v1/me');
+      // La red se cae MIENTRAS el refresh está en curso. (Completar el error
+      // antes de que alguien escuche el Future lo reportaría como no manejado.)
+      await Future<void>.delayed(const Duration(milliseconds: 10));
       refreshResult.completeError(
         DioException.connectionError(
           requestOptions: RequestOptions(),
@@ -141,10 +146,7 @@ void main() {
         ),
       );
 
-      await expectLater(
-        dio.get<Object?>('/v1/me'),
-        throwsA(isA<DioException>()),
-      );
+      await expectLater(call, throwsA(isA<DioException>()));
 
       expect(await store.read(), isNotNull);
       expect(sessionExpiredCalls, 0);
