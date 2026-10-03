@@ -1,6 +1,7 @@
 import rateLimit from '@fastify/rate-limit';
 import Fastify, { type FastifyInstance } from 'fastify';
 
+import { ChaosController, chaosAdminRoutes, registerChaos } from './chaos/chaos.js';
 import type { Deps } from './container.js';
 import { accountsRoutes } from './modules/accounts/accounts.routes.js';
 import { activityAdminRoutes } from './modules/activity/activity.routes.js';
@@ -35,7 +36,20 @@ export async function buildApp(deps: Deps, options: AppOptions = {}): Promise<Fa
     reply.header('x-correlation-id', request.id);
   });
 
-  // TODO(chaos): registrar aquí el middleware de chaos y sus rutas /admin/chaos.
+  // Defensa en profundidad: en producción el chaos ni siquiera se registra,
+  // así una ADMIN_KEY filtrada no basta para tumbar servicios.
+  if (deps.config.chaosEnabled) {
+    const chaosController = new ChaosController();
+
+    // 1. Registrar el hook de chaos antes de definir las rutas del sistema
+    registerChaos(app, chaosController);
+
+    // 2. Registrar las rutas administrativas de chaos con la clave de admin de tu config
+    await app.register(chaosAdminRoutes, {
+      controller: chaosController,
+      adminKey: deps.config.adminKey,
+    });
+  }
 
   app.get('/health', async () => ({
     status: 'ok',

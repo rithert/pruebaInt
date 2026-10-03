@@ -14,7 +14,10 @@ export interface TestContext {
 }
 
 /** App completa con BD en memoria, reloj controlable y aleatoriedad fija. */
-export async function createTestContext(start = new Date('2026-10-03T12:00:00.000Z')): Promise<TestContext> {
+export async function createTestContext(
+  start = new Date('2026-10-03T12:00:00.000Z'),
+  env: NodeJS.ProcessEnv = {},
+): Promise<TestContext> {
   let current = start;
   const clock = {
     now: () => current,
@@ -28,6 +31,7 @@ export async function createTestContext(start = new Date('2026-10-03T12:00:00.00
     DATABASE_PATH: ':memory:',
     ACTIVITY_INTERVAL_MS: '0',
     AUTH_RATE_LIMIT_PER_MINUTE: '1000',
+    ...env,
   });
   const deps = createDeps(config, {
     db: openDatabase(':memory:'),

@@ -12,6 +12,8 @@ export interface AppConfig {
   activityIntervalMs: number;
   /** Clave para las rutas /admin (chaos, disparo manual de actividad). */
   adminKey: string;
+  /** Registra el chaos testing. Por defecto: activo salvo en producción. */
+  chaosEnabled: boolean;
 }
 
 const DEV_JWT_SECRET = 'dev-only-secret-change-me-0123456789abcdef';
@@ -40,6 +42,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     authRateLimitPerMinute: Number(env.AUTH_RATE_LIMIT_PER_MINUTE ?? 10),
     activityIntervalMs: Number(env.ACTIVITY_INTERVAL_MS ?? 60_000),
     adminKey,
+    chaosEnabled: env.CHAOS_ENABLED ? env.CHAOS_ENABLED === 'true' : !isProd,
   };
 }
 
