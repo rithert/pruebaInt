@@ -64,7 +64,9 @@ describe('Cuentas y movimientos', () => {
 
   it('filtra movimientos por categoría', async () => {
     const account = await firstAccount();
-    const body = (await get(`/v1/accounts/${account.id}/transactions?category=income&limit=50`)).json();
+    const body = (
+      await get(`/v1/accounts/${account.id}/transactions?category=income&limit=50`)
+    ).json();
 
     expect(body.items.length).toBeGreaterThan(0);
     expect(body.items.every((t: TransactionDto) => t.category === 'income')).toBe(true);
@@ -89,7 +91,8 @@ describe('Cuentas y movimientos', () => {
   it('no permite ver cuentas ni movimientos de otro cliente', async () => {
     const account = await firstAccount();
     const tx = (await get(`/v1/accounts/${account.id}/transactions?limit=1`)).json().items[0];
-    const intruder = (await registerUser(ctx.app, { email: 'otro@example.com' })).session.accessToken;
+    const intruder = (await registerUser(ctx.app, { email: 'otro@example.com' })).session
+      .accessToken;
 
     expect((await get(`/v1/accounts/${account.id}`, intruder)).statusCode).toBe(404);
     expect((await get(`/v1/accounts/${account.id}/transactions`, intruder)).statusCode).toBe(404);

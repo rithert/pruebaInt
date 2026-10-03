@@ -1,6 +1,10 @@
 import type { Segment } from '../../shared/segments.js';
 import { between, pick, type Random, weightedPick } from '../../shared/random.js';
-import type { AccountRow, AccountType, AccountsRepository } from '../accounts/accounts.repository.js';
+import type {
+  AccountRow,
+  AccountType,
+  AccountsRepository,
+} from '../accounts/accounts.repository.js';
 import { CLIENTS, cop, CURRENCY, SPENDING, SPENDING_WEIGHTS, SUPPLIERS } from './catalog.js';
 
 const HISTORY_DAYS = 90;
@@ -106,11 +110,32 @@ function planHistory(segment: Segment, start: number, random: Random): PlannedEn
     start + day * DAY_MS + hour * 3600 * 1000 + between(random, 0, 59) * 60 * 1000;
 
   // Transferencia entre cuentas propias: dos asientos con la misma clave.
-  const internalTransfer = (day: number, from: PlannedEntry['role'], to: PlannedEntry['role'], amount: number, description: string, category: string) => {
+  const internalTransfer = (
+    day: number,
+    from: PlannedEntry['role'],
+    to: PlannedEntry['role'],
+    amount: number,
+    description: string,
+    category: string,
+  ) => {
     const key = `${day}-${from}-${to}`;
     const time = at(day, 9);
-    entries.push({ at: time, role: from, amountMinor: -amount, description, category: 'transfer', transferKey: key });
-    entries.push({ at: time + 1000, role: to, amountMinor: amount, description, category, transferKey: key });
+    entries.push({
+      at: time,
+      role: from,
+      amountMinor: -amount,
+      description,
+      category: 'transfer',
+      transferKey: key,
+    });
+    entries.push({
+      at: time + 1000,
+      role: to,
+      amountMinor: amount,
+      description,
+      category,
+      transferKey: key,
+    });
   };
 
   for (let day = 0; day < HISTORY_DAYS; day++) {
@@ -150,16 +175,37 @@ function planHistory(segment: Segment, start: number, random: Random): PlannedEn
         });
       }
       if (dayOfCycle === 28) {
-        internalTransfer(day, 'business', 'main', cop(between(random, 1_500_000, 2_500_000)), 'Retiro de utilidades', 'income');
+        internalTransfer(
+          day,
+          'business',
+          'main',
+          cop(between(random, 1_500_000, 2_500_000)),
+          'Retiro de utilidades',
+          'income',
+        );
       }
     }
 
     // Hábitos de ahorro e inversión según el segmento.
     if (segment === 'saver' && day % 7 === 1) {
-      internalTransfer(day, 'main', 'goal', cop(between(random, 50_000, 150_000)), 'Ahorro programado', 'savings');
+      internalTransfer(
+        day,
+        'main',
+        'goal',
+        cop(between(random, 50_000, 150_000)),
+        'Ahorro programado',
+        'savings',
+      );
     }
     if (segment === 'investor' && dayOfCycle === 2) {
-      internalTransfer(day, 'main', 'investment', cop(between(random, 300_000, 800_000)), 'Aporte a inversión', 'investment');
+      internalTransfer(
+        day,
+        'main',
+        'investment',
+        cop(between(random, 300_000, 800_000)),
+        'Aporte a inversión',
+        'investment',
+      );
     }
     if (segment === 'investor' && dayOfCycle === 29) {
       entries.push({

@@ -14,7 +14,11 @@ function generateFor(segment: 'saver' | 'investor' | 'entrepreneur', seed: numbe
     `INSERT INTO users VALUES ('u1', 'a@b.co', 'x', 'Ana', 'save', ?, '2026-01-01', '2026-01-01')`,
   ).run(segment);
   const repo = new AccountsRepository(db);
-  const accounts = new PortfolioGenerator(repo).generate({ id: 'u1', segment }, NOW, seededRandom(seed));
+  const accounts = new PortfolioGenerator(repo).generate(
+    { id: 'u1', segment },
+    NOW,
+    seededRandom(seed),
+  );
   return { db, repo, accounts };
 }
 
@@ -89,7 +93,11 @@ describe('ActivityEngine', () => {
   });
 
   it('el endpoint de administración exige la clave', async () => {
-    const response = await ctx.app.inject({ method: 'POST', url: '/admin/activity/tick', payload: {} });
+    const response = await ctx.app.inject({
+      method: 'POST',
+      url: '/admin/activity/tick',
+      payload: {},
+    });
 
     expect(response.statusCode).toBe(403);
   });

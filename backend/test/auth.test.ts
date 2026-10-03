@@ -1,6 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { bearer, createTestContext, registerUser, type TestContext, validRegistration } from './helpers.js';
+import {
+  bearer,
+  createTestContext,
+  registerUser,
+  type TestContext,
+  validRegistration,
+} from './helpers.js';
 
 describe('Autenticación', () => {
   let ctx: TestContext;
@@ -146,7 +152,11 @@ describe('Autenticación', () => {
 
       expect(response.statusCode).toBe(200);
       expect(renewed.refreshToken).not.toBe(session.refreshToken);
-      const me = await ctx.app.inject({ method: 'GET', url: '/v1/me', headers: bearer(renewed.accessToken) });
+      const me = await ctx.app.inject({
+        method: 'GET',
+        url: '/v1/me',
+        headers: bearer(renewed.accessToken),
+      });
       expect(me.statusCode).toBe(200);
     });
 

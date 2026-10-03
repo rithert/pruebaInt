@@ -17,7 +17,11 @@ export async function transfersRoutes(app: FastifyInstance, { deps }: { deps: De
   app.post('/transfers', { config: { service: 'transfers' } }, async (request, reply) => {
     const key = idempotencyKey.safeParse(request.headers['idempotency-key']);
     if (!key.success) {
-      throw new AppError(400, 'idempotency_key_required', 'Falta el header Idempotency-Key (8-64 caracteres).');
+      throw new AppError(
+        400,
+        'idempotency_key_required',
+        'Falta el header Idempotency-Key (8-64 caracteres).',
+      );
     }
     const body = transferBody.parse(request.body);
 

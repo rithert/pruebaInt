@@ -153,7 +153,6 @@ export class AccountsRepository {
          WHERE t.id = ? AND a.user_id = ?`,
       )
       .get(transactionId, userId) as unknown as
-      | (TransactionRow & { currency: string; account_name: string })
-      | undefined;
+      (TransactionRow & { currency: string; account_name: string }) | undefined;
   }
 }

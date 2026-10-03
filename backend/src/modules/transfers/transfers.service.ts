@@ -48,7 +48,9 @@ export class TransfersService {
 
     const outcome = inTransaction(db, () => {
       const previous = db
-        .prepare('SELECT request_hash, response_json FROM transfers WHERE user_id = ? AND idempotency_key = ?')
+        .prepare(
+          'SELECT request_hash, response_json FROM transfers WHERE user_id = ? AND idempotency_key = ?',
+        )
         .get(userId, idempotencyKey) as { request_hash: string; response_json: string } | undefined;
 
       if (previous) {
@@ -62,7 +64,10 @@ export class TransfersService {
       }
 
       if (input.fromAccountId === input.toAccountId) {
-        throw Errors.unprocessable('same_account', 'La cuenta de origen y destino deben ser distintas.');
+        throw Errors.unprocessable(
+          'same_account',
+          'La cuenta de origen y destino deben ser distintas.',
+        );
       }
       const from = accounts.findForUser(input.fromAccountId, userId);
       const to = accounts.findForUser(input.toAccountId, userId);

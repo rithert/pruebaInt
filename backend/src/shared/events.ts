@@ -19,7 +19,10 @@ export interface DomainEventMap {
 export class DomainEvents {
   private readonly emitter = new EventEmitter();
 
-  on<K extends keyof DomainEventMap>(event: K, listener: (payload: DomainEventMap[K]) => void): void {
+  on<K extends keyof DomainEventMap>(
+    event: K,
+    listener: (payload: DomainEventMap[K]) => void,
+  ): void {
     this.emitter.on(event, listener);
   }
 

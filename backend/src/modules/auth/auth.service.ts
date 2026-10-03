@@ -77,7 +77,10 @@ export class AuthService {
     return { user: toProfile(user), session: await this.openSession(user.id) };
   }
 
-  async login(emailInput: string, password: string): Promise<{ user: UserProfile; session: Session }> {
+  async login(
+    emailInput: string,
+    password: string,
+  ): Promise<{ user: UserProfile; session: Session }> {
     const user = this.deps.repository.findUserByEmail(normalizeEmail(emailInput));
     const valid = await verifyPassword(password, user?.password_hash ?? DUMMY_HASH);
 

@@ -27,7 +27,11 @@ describe('Transferencias entre cuentas propias', () => {
     });
 
   it('mueve el dinero y devuelve los saldos actualizados', async () => {
-    const response = await transfer({ fromAccountId: main.id, toAccountId: goal.id, amountMinor: 1_000_00 });
+    const response = await transfer({
+      fromAccountId: main.id,
+      toAccountId: goal.id,
+      amountMinor: 1_000_00,
+    });
 
     expect(response.statusCode).toBe(201);
     expect(response.json()).toMatchObject({
@@ -53,14 +57,21 @@ describe('Transferencias entre cuentas propias', () => {
 
   it('rechaza reutilizar una clave con datos distintos', async () => {
     await transfer({ fromAccountId: main.id, toAccountId: goal.id, amountMinor: 500_00 });
-    const response = await transfer({ fromAccountId: main.id, toAccountId: goal.id, amountMinor: 900_00 });
+    const response = await transfer({
+      fromAccountId: main.id,
+      toAccountId: goal.id,
+      amountMinor: 900_00,
+    });
 
     expect(response.statusCode).toBe(422);
     expect(response.json().error.code).toBe('idempotency_key_reused');
   });
 
   it('exige el header Idempotency-Key', async () => {
-    const response = await transfer({ fromAccountId: main.id, toAccountId: goal.id, amountMinor: 100 }, null);
+    const response = await transfer(
+      { fromAccountId: main.id, toAccountId: goal.id, amountMinor: 100 },
+      null,
+    );
 
     expect(response.statusCode).toBe(400);
     expect(response.json().error.code).toBe('idempotency_key_required');
@@ -78,7 +89,11 @@ describe('Transferencias entre cuentas propias', () => {
   });
 
   it('rechaza transferir a la misma cuenta', async () => {
-    const response = await transfer({ fromAccountId: main.id, toAccountId: main.id, amountMinor: 100 });
+    const response = await transfer({
+      fromAccountId: main.id,
+      toAccountId: main.id,
+      amountMinor: 100,
+    });
 
     expect(response.json().error.code).toBe('same_account');
   });

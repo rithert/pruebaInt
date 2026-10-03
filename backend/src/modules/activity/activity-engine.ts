@@ -50,11 +50,12 @@ export class ActivityEngine {
    */
   tick(options: { userId?: string } = {}): TransactionRow[] {
     const { db, random } = this.deps;
-    const users = (
-      options.userId
-        ? db.prepare('SELECT id, segment FROM users WHERE id = ?').all(options.userId)
-        : db.prepare('SELECT id, segment FROM users').all()
-    ) as unknown as { id: string; segment: Segment }[];
+    const users = (options.userId
+      ? db.prepare('SELECT id, segment FROM users WHERE id = ?').all(options.userId)
+      : db.prepare('SELECT id, segment FROM users').all()) as unknown as {
+      id: string;
+      segment: Segment;
+    }[];
 
     const created: TransactionRow[] = [];
     for (const user of users) {

@@ -28,14 +28,12 @@ export class AuthRepository {
 
   findUserByEmail(email: string): UserRow | undefined {
     return this.db.prepare('SELECT * FROM users WHERE email = ?').get(email) as unknown as
-      | UserRow
-      | undefined;
+      UserRow | undefined;
   }
 
   findUserById(id: string): UserRow | undefined {
     return this.db.prepare('SELECT * FROM users WHERE id = ?').get(id) as unknown as
-      | UserRow
-      | undefined;
+      UserRow | undefined;
   }
 
   insertUser(user: UserRow): void {
