@@ -1,0 +1,81 @@
+# CI de Trunk Based Development: cada push a main y cada PR de vida corta
+# debe dejar el tronco en verde. Los jobs corren en paralelo y solo se
+# disparan si cambió su parte del monorepo.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      flutter: ${{ steps.filter.outputs.flutter }}
+      backend: ${{ steps.filter.outputs.backend }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            flutter:
+              - 'apps/**'
+              - 'packages/**'
+              - 'pubspec.yaml'
+              - 'analysis_options.yaml'
+              - '.github/workflows/ci.yml'
+            backend:
+              - 'backend/**'
+              - '.github/workflows/ci.yml'
+
+  flutter:
+    needs: changes
+    if: needs.changes.outputs.flutter == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.35.2
+          channel: stable
+          cache: true
+      - name: Dependencias del workspace
+        run: |
+          flutter pub get
+          dart pub global activate melos 8.9.0
+      - name: Formato
+        run: dart format --output=none --set-exit-if-changed .
+      - name: Análisis estático
+        run: dart analyze --fatal-infos .
+      - name: Tests (unitarios y de widgets) con cobertura
+        run: melos run test --no-select
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: '**/coverage/lcov.info'
+
+  backend:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
