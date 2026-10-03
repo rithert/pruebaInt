@@ -1,0 +1,19 @@
+name: core
+description: "Capacidades transversales: red y resiliencia, almacenamiento, observabilidad y feature flags."
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.9.0
+  flutter: ">=3.35.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0

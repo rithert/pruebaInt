@@ -1,0 +1,38 @@
+# --- Dart / Flutter ---
+.dart_tool/
+.packages
+build/
+coverage/
+*.iml
+.idea/
+.flutter-plugins
+.flutter-plugins-dependencies
+pubspec_overrides.yaml
+
+# --- Node (backend, mini apps) ---
+node_modules/
+dist/
+*.log
+.env
+.env.*
+!.env.example
+
+# --- Datos locales ---
+*.db
+*.db-journal
+*.sqlite
+
+# --- Secretos: nunca versionar ---
+**/google-services.json
+**/GoogleService-Info.plist
+**/firebase-service-account*.json
+*.jks
+*.keystore
+key.properties
+
+# --- SO / editores ---
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json

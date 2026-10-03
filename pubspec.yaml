@@ -1,0 +1,38 @@
+name: fintech_workspace
+description: Monorepo de la plataforma financiera digital (app shell + módulos por dominio).
+publish_to: none
+
+environment:
+  sdk: ^3.9.0
+
+# Dart pub workspaces: una sola resolución de dependencias para todo el monorepo.
+# Cada módulo declara `resolution: workspace` en su pubspec.
+workspace:
+  - apps/super_app
+  - packages/core
+  - packages/design_system
+
+dev_dependencies:
+  flutter_lints: ^5.0.0
+  melos: ^8.0.0
+
+melos:
+  repository: https://github.com/OWNER/REPO
+  scripts:
+    analyze:
+      description: Análisis estático de todos los paquetes.
+      run: dart analyze --fatal-infos .
+    format:check:
+      description: Verifica formato sin modificar archivos.
+      run: dart format --output=none --set-exit-if-changed .
+    test:
+      description: Corre tests de todos los paquetes Flutter que tengan carpeta test/.
+      exec: flutter test --coverage
+      packageFilters:
+        dirExists: test
+    test:changed:
+      description: Corre tests solo en paquetes con cambios respecto a main (útil en TBD).
+      exec: flutter test
+      packageFilters:
+        dirExists: test
+        diff: origin/main
