@@ -16,7 +16,7 @@ Transaction _tx(String id) => Transaction(
   accountId: 'acc-1',
   amountMinor: -1000,
   balanceAfterMinor: 0,
-  currency: 'COP',
+  currency: 'USD',
   description: 'Compra',
   category: 'groceries',
   bookedAt: DateTime(2026, 10, 3),

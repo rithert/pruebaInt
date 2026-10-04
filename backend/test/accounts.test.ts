@@ -41,7 +41,7 @@ describe('Cuentas y movimientos', () => {
       expect(account.maskedNumber).toMatch(/^•••• \d{4}$/);
     }
     const sum = (body.accounts as AccountDto[]).reduce((s, a) => s + a.balanceMinor, 0);
-    expect(body.totals).toEqual([{ currency: 'COP', balanceMinor: sum }]);
+    expect(body.totals).toEqual([{ currency: 'USD', balanceMinor: sum }]);
   });
 
   it('pagina los movimientos por cursor, ordenados y sin duplicados', async () => {
@@ -85,7 +85,7 @@ describe('Cuentas y movimientos', () => {
     const detail = await get(`/v1/transactions/${tx.id}`);
 
     expect(detail.statusCode).toBe(200);
-    expect(detail.json()).toMatchObject({ id: tx.id, accountName: account.name, currency: 'COP' });
+    expect(detail.json()).toMatchObject({ id: tx.id, accountName: account.name, currency: 'USD' });
   });
 
   it('no permite ver cuentas ni movimientos de otro cliente', async () => {

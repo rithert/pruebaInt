@@ -1,23 +1,35 @@
-/// Formateo de dinero y fechas para es-CO, sin dependencias externas.
+/// Formateo de dinero (USD) y fechas para es-EC, sin dependencias externas.
 abstract final class Formatters {
   static const _months = [
     'ene', 'feb', 'mar', 'abr', 'may', 'jun', //
     'jul', 'ago', 'sep', 'oct', 'nov', 'dic',
   ];
 
-  /// `128430000` (centavos) → `$ 1.284.300`. Los pesos colombianos no usan
-  /// decimales en la práctica, así que se omiten.
-  static String money(int amountMinor, {String currency = 'COP'}) {
+  static final _amountInput = RegExp(r'^(\d{1,7})(?:[.,](\d{0,2}))?$');
+
+  /// `128430` (centavos) → `$1.284,30`. Formato es-EC (CLDR): punto para
+  /// miles y coma para decimales; Ecuador está dolarizado.
+  static String money(int amountMinor) {
     final negative = amountMinor < 0;
-    final pesos = (amountMinor.abs() ~/ 100).toString();
-    final grouped = pesos.replaceAllMapped(
+    final abs = amountMinor.abs();
+    final dollars = (abs ~/ 100).toString().replaceAllMapped(
       RegExp(r'\B(?=(\d{3})+(?!\d))'),
       (_) => '.',
     );
-    return '${negative ? '-' : ''}\$ $grouped';
+    final cents = (abs % 100).toString().padLeft(2, '0');
+    return '${negative ? '-' : ''}\$$dollars,$cents';
   }
 
-  /// Monto con signo explícito para movimientos: `+$ 1.800.000`, `-$ 45.200`.
+  /// Monto escrito por el usuario (`12`, `12,5`, `12.50`) → centavos.
+  /// Devuelve `null` si el texto no es un monto válido.
+  static int? parseAmount(String text) {
+    final match = _amountInput.firstMatch(text.trim());
+    if (match == null) return null;
+    final cents = (match.group(2) ?? '').padRight(2, '0');
+    return int.parse(match.group(1)!) * 100 + int.parse(cents);
+  }
+
+  /// Monto con signo explícito para movimientos: `+$1.800,00`, `-$45,20`.
   static String signedMoney(int amountMinor) =>
       amountMinor >= 0 ? '+${money(amountMinor)}' : money(amountMinor);
 

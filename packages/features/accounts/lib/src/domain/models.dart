@@ -71,7 +71,7 @@ class AccountsOverview extends Equatable {
   /// Saldo total (todas las cuentas comparten moneda en este alcance).
   final int totalMinor;
 
-  String get currency => accounts.isEmpty ? 'COP' : accounts.first.currency;
+  String get currency => accounts.isEmpty ? 'USD' : accounts.first.currency;
 
   @override
   List<Object?> get props => [accounts, totalMinor];

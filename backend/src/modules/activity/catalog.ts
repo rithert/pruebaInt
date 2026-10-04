@@ -1,13 +1,16 @@
+import { between, type Random } from '../../shared/random.js';
 import type { Segment } from '../../shared/segments.js';
 
-export const CURRENCY = 'COP';
+/** Ecuador está dolarizado: todas las cuentas operan en USD. */
+export const CURRENCY = 'USD';
 
-/** Convierte pesos a unidades menores (centavos). */
-export const cop = (pesos: number) => pesos * 100;
+/** Monto aleatorio en centavos entre `min` y `max` dólares (con centavos). */
+export const usd = (random: Random, min: number, max: number) =>
+  between(random, Math.round(min * 100), Math.round(max * 100));
 
 export interface SpendingCategory {
   merchants: readonly string[];
-  /** Rango del cargo en pesos. */
+  /** Rango del cargo en dólares. */
   min: number;
   max: number;
 }
@@ -15,34 +18,34 @@ export interface SpendingCategory {
 export const SPENDING: Record<string, SpendingCategory> = {
   groceries: {
     merchants: ['Supermercado La Canasta', 'Mercado Fresco', 'Tienda Don Pepe'],
-    min: 15_000,
-    max: 220_000,
+    min: 4,
+    max: 95,
   },
   restaurants: {
     merchants: ['Restaurante El Fogón', 'Café Central', 'Pizzería Napoli'],
-    min: 12_000,
-    max: 120_000,
+    min: 3.5,
+    max: 38,
   },
   transport: {
     merchants: ['Transporte urbano', 'App de movilidad', 'Gasolinera Ruta 7'],
-    min: 3_000,
-    max: 90_000,
+    min: 0.45,
+    max: 18,
   },
   entertainment: {
     merchants: ['Streaming Plus', 'Cine Estrella', 'Música Ilimitada'],
-    min: 15_000,
-    max: 60_000,
+    min: 4.99,
+    max: 14.99,
   },
-  health: { merchants: ['Farmacia Salud', 'Laboratorio Vida'], min: 10_000, max: 150_000 },
+  health: { merchants: ['Farmacia Salud', 'Laboratorio Vida'], min: 2.5, max: 45 },
   shopping: {
     merchants: ['Tienda de ropa Moda Viva', 'Librería Páginas', 'Electro Hogar'],
-    min: 30_000,
-    max: 450_000,
+    min: 12,
+    max: 160,
   },
   utilities: {
-    merchants: ['Empresa de energía', 'Acueducto municipal', 'Internet Hogar'],
-    min: 60_000,
-    max: 250_000,
+    merchants: ['Empresa eléctrica', 'Agua potable municipal', 'Internet Hogar'],
+    min: 18,
+    max: 75,
   },
 };
 

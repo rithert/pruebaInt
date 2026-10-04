@@ -9,7 +9,7 @@ Map<String, Object?> _txJson(String id) => {
   'accountId': 'acc-1',
   'amountMinor': -4520000,
   'balanceAfterMinor': 100000000,
-  'currency': 'COP',
+  'currency': 'USD',
   'direction': 'debit',
   'description': 'Compra con tarjeta débito',
   'category': 'groceries',
@@ -45,12 +45,12 @@ void main() {
           'type': 'savings',
           'name': 'Cuenta de ahorros',
           'maskedNumber': '•••• 1234',
-          'currency': 'COP',
+          'currency': 'USD',
           'balanceMinor': 150000000,
         },
       ],
       'totals': [
-        {'currency': 'COP', 'balanceMinor': 150000000},
+        {'currency': 'USD', 'balanceMinor': 150000000},
       ],
       'asOf': '2026-10-03T12:00:00.000Z',
     });
@@ -111,7 +111,7 @@ void main() {
     adapter.enqueueJson(201, {
       'transferId': 'tr-1',
       'amountMinor': 5000000,
-      'currency': 'COP',
+      'currency': 'USD',
       'from': {'accountId': 'a', 'balanceMinor': 1},
       'to': {'accountId': 'b', 'balanceMinor': 2},
       'createdAt': '2026-10-03T12:00:00.000Z',

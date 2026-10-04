@@ -5,7 +5,7 @@ import type {
   AccountType,
   AccountsRepository,
 } from '../accounts/accounts.repository.js';
-import { CLIENTS, cop, CURRENCY, SPENDING, SPENDING_WEIGHTS, SUPPLIERS } from './catalog.js';
+import { CLIENTS, CURRENCY, SPENDING, SPENDING_WEIGHTS, SUPPLIERS, usd } from './catalog.js';
 
 const HISTORY_DAYS = 90;
 const DAY_MS = 24 * 3600 * 1000;
@@ -146,7 +146,7 @@ function planHistory(segment: Segment, start: number, random: Random): PlannedEn
       entries.push({
         at: at(day, 7),
         role: 'main',
-        amountMinor: cop(between(random, 1_400_000, 2_300_000)),
+        amountMinor: usd(random, 380, 950),
         description: 'Pago de nómina',
         category: 'income',
         counterparty: 'Empleador',
@@ -158,7 +158,7 @@ function planHistory(segment: Segment, start: number, random: Random): PlannedEn
         entries.push({
           at: at(day, 9 + i * 2),
           role: 'business',
-          amountMinor: cop(between(random, 40_000, 380_000)),
+          amountMinor: usd(random, 12, 180),
           description: 'Venta recibida',
           category: 'sales',
           counterparty: pick(random, CLIENTS),
@@ -168,7 +168,7 @@ function planHistory(segment: Segment, start: number, random: Random): PlannedEn
         entries.push({
           at: at(day, 16),
           role: 'business',
-          amountMinor: -cop(between(random, 250_000, 900_000)),
+          amountMinor: -usd(random, 90, 420),
           description: 'Pago a proveedor',
           category: 'suppliers',
           counterparty: pick(random, SUPPLIERS),
@@ -179,7 +179,7 @@ function planHistory(segment: Segment, start: number, random: Random): PlannedEn
           day,
           'business',
           'main',
-          cop(between(random, 1_500_000, 2_500_000)),
+          usd(random, 450, 900),
           'Retiro de utilidades',
           'income',
         );
@@ -188,21 +188,14 @@ function planHistory(segment: Segment, start: number, random: Random): PlannedEn
 
     // Hábitos de ahorro e inversión según el segmento.
     if (segment === 'saver' && day % 7 === 1) {
-      internalTransfer(
-        day,
-        'main',
-        'goal',
-        cop(between(random, 50_000, 150_000)),
-        'Ahorro programado',
-        'savings',
-      );
+      internalTransfer(day, 'main', 'goal', usd(random, 15, 60), 'Ahorro programado', 'savings');
     }
     if (segment === 'investor' && dayOfCycle === 2) {
       internalTransfer(
         day,
         'main',
         'investment',
-        cop(between(random, 300_000, 800_000)),
+        usd(random, 80, 300),
         'Aporte a inversión',
         'investment',
       );
@@ -211,7 +204,7 @@ function planHistory(segment: Segment, start: number, random: Random): PlannedEn
       entries.push({
         at: at(day, 6),
         role: 'investment',
-        amountMinor: cop(between(random, 8_000, 25_000)),
+        amountMinor: usd(random, 2.5, 9),
         description: 'Rendimientos del mes',
         category: 'returns',
       });
@@ -225,7 +218,7 @@ function planHistory(segment: Segment, start: number, random: Random): PlannedEn
       entries.push({
         at: at(day, 10 + i * 3),
         role: 'main',
-        amountMinor: -cop(between(random, category.min, category.max)),
+        amountMinor: -usd(random, category.min, category.max),
         description: 'Compra con tarjeta débito',
         category: categoryName,
         counterparty: pick(random, category.merchants),

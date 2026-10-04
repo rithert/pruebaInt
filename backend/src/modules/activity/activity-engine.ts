@@ -5,7 +5,7 @@ import type { DomainEvents } from '../../shared/events.js';
 import { between, pick, type Random, weightedPick } from '../../shared/random.js';
 import type { Segment } from '../../shared/segments.js';
 import type { AccountsRepository, TransactionRow } from '../accounts/accounts.repository.js';
-import { cop, PEOPLE, SPENDING, SPENDING_WEIGHTS } from './catalog.js';
+import { PEOPLE, SPENDING, SPENDING_WEIGHTS, usd } from './catalog.js';
 
 interface EngineDeps {
   db: Db;
@@ -73,12 +73,12 @@ export class ActivityEngine {
 
     const categoryName = weightedPick(random, SPENDING_WEIGHTS[user.segment]);
     const category = SPENDING[categoryName]!;
-    const purchaseMinor = -cop(between(random, category.min, category.max));
+    const purchaseMinor = -usd(random, category.min, category.max);
 
     // Si no alcanza el saldo para el gasto, el ciclo genera un abono: así
     // cada ciclo forzado produce siempre un movimiento (y su push).
     const incoming = random() < 0.3 || main.balance_minor + purchaseMinor < 0;
-    const amountMinor = incoming ? cop(between(random, 20_000, 250_000)) : purchaseMinor;
+    const amountMinor = incoming ? usd(random, 10, 120) : purchaseMinor;
 
     const tx = inTransaction(db, () =>
       accounts.applyTransaction(main.id, {

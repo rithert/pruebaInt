@@ -5,16 +5,27 @@ void main() {
   final now = DateTime(2026, 10, 3, 15);
 
   group('money', () {
-    test('formatea pesos con separador de miles y sin decimales', () {
-      expect(Formatters.money(128430000), r'$ 1.284.300');
-      expect(Formatters.money(0), r'$ 0');
-      expect(Formatters.money(99900), r'$ 999');
-      expect(Formatters.money(-4520000), r'-$ 45.200');
+    test('formatea dólares en es-EC: miles con punto y centavos con coma', () {
+      expect(Formatters.money(128430), r'$1.284,30');
+      expect(Formatters.money(0), r'$0,00');
+      expect(Formatters.money(5), r'$0,05');
+      expect(Formatters.money(123456789), r'$1.234.567,89');
+      expect(Formatters.money(-4520), r'-$45,20');
     });
 
     test('signedMoney antepone + a los abonos', () {
-      expect(Formatters.signedMoney(180000000), r'+$ 1.800.000');
-      expect(Formatters.signedMoney(-1200000), r'-$ 12.000');
+      expect(Formatters.signedMoney(180000), r'+$1.800,00');
+      expect(Formatters.signedMoney(-1250), r'-$12,50');
+    });
+
+    test('parseAmount lee montos con coma o punto y hasta 2 decimales', () {
+      expect(Formatters.parseAmount('12'), 1200);
+      expect(Formatters.parseAmount('12,5'), 1250);
+      expect(Formatters.parseAmount('12.05'), 1205);
+      expect(Formatters.parseAmount('0,99'), 99);
+      expect(Formatters.parseAmount(''), isNull);
+      expect(Formatters.parseAmount('12,345'), isNull);
+      expect(Formatters.parseAmount('abc'), isNull);
     });
   });
 

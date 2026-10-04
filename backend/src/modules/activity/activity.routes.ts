@@ -4,6 +4,7 @@ import { z } from 'zod';
 import type { Deps } from '../../container.js';
 import { requireAdminKey } from '../../shared/admin-guard.js';
 import { toTransactionDto } from '../accounts/accounts.mapper.js';
+import { CURRENCY } from './catalog.js';
 
 const tickBody = z.object({ userId: z.string().min(1).optional() }).default({});
 
@@ -17,6 +18,6 @@ export async function activityAdminRoutes(app: FastifyInstance, { deps }: { deps
   app.post('/admin/activity/tick', async (request) => {
     const { userId } = tickBody.parse(request.body ?? {});
     const created = deps.activityEngine.tick({ userId });
-    return { created: created.map((tx) => toTransactionDto(tx, 'COP')) };
+    return { created: created.map((tx) => toTransactionDto(tx, CURRENCY)) };
   });
 }

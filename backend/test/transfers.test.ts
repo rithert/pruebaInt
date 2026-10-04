@@ -30,13 +30,13 @@ describe('Transferencias entre cuentas propias', () => {
     const response = await transfer({
       fromAccountId: main.id,
       toAccountId: goal.id,
-      amountMinor: 1_000_00,
+      amountMinor: 100_00,
     });
 
     expect(response.statusCode).toBe(201);
     expect(response.json()).toMatchObject({
-      from: { accountId: main.id, balanceMinor: main.balanceMinor - 1_000_00 },
-      to: { accountId: goal.id, balanceMinor: goal.balanceMinor + 1_000_00 },
+      from: { accountId: main.id, balanceMinor: main.balanceMinor - 100_00 },
+      to: { accountId: goal.id, balanceMinor: goal.balanceMinor + 100_00 },
     });
   });
 
