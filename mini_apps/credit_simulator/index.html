@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Simulador de crédito</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Simula tu crédito</h1>
+      <p id="intro" class="muted">Conectando con tu banca…</p>
+
+      <p id="standalone" class="notice" hidden>
+        Esta mini app funciona dentro de la app del banco. Ábrela desde
+        <strong>Inicio → Simular crédito</strong>.
+      </p>
+
+      <form id="form" aria-describedby="intro" hidden>
+        <label for="amount">Monto: <output id="amountLabel" for="amount"></output></label>
+        <input id="amount" type="range" min="500" max="50000" step="100" value="5000" />
+
+        <label for="term">Plazo</label>
+        <select id="term">
+          <option value="6">6 meses</option>
+          <option value="12">12 meses</option>
+          <option value="24" selected>24 meses</option>
+          <option value="36">36 meses</option>
+          <option value="48">48 meses</option>
+          <option value="60">60 meses</option>
+        </select>
+
+        <section id="result" aria-live="polite" class="card">
+          <p class="muted">Cuota mensual</p>
+          <p id="payment" class="big">—</p>
+          <p id="details" class="muted"></p>
+        </section>
+
+        <p id="message" role="status" class="notice" hidden></p>
+
+        <button id="request" type="button" disabled>Solicitar este crédito</button>
+        <button id="close" type="button" class="secondary">Cerrar</button>
+      </form>
+
+      <p class="legal muted">
+        Valores referenciales calculados con sistema francés (cuota fija). No
+        constituyen una oferta en firme.
+      </p>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
