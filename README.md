@@ -65,6 +65,16 @@ fvm flutter run                 # usa http://localhost:3000 por defecto
 
 > `adb reverse` se pierde al desconectar el cable o reiniciar adb: si la app muestra "Sin conexión", vuelve a ejecutarlo. Para un teléfono físico, activa **Opciones de desarrollador → Depuración por USB** y acepta la huella del PC al conectarlo.
 
+### Notificaciones push (opcional)
+
+El repositorio **no incluye credenciales de Firebase**. Sin ellas todo funciona igual, salvo las notificaciones y la telemetría remota. Para habilitarlas con tu propio proyecto:
+
+1. Crea un proyecto en [Firebase](https://console.firebase.google.com) y activa Crashlytics.
+2. `firebase login` y luego, en `apps/super_app`: `flutterfire configure --project=<tu-id> --platforms=android --android-package-name=com.pruebatecnica.super_app`. Esto genera `android/app/google-services.json`.
+3. En Firebase, ve a **Configuración → Cuentas de servicio → Generar clave privada** y guárdala como `backend/firebase-service-account.json`.
+
+Ambos archivos están en `.gitignore`.
+
 ### Desde VS Code (recomendado)
 
 En *Run and Debug* (`Ctrl+Shift+D`), elige **"Todo (BFF + mini apps + App)"** y presiona **F5**: levanta el BFF en modo watch y el servidor de mini apps, ejecuta `adb reverse` (3000 y 3100) y lanza la app en el dispositivo conectado. También hay lanzadores individuales.
@@ -99,7 +109,9 @@ Todas las respuestas de error usan el formato `{ error: { code, message, correla
 | POST | `/v1/mini-apps/:appId/token` | Bearer | Token delegado (5 min, alcance mínimo) para una mini app |
 | POST | `/v1/credit/applications` | Bearer | Solicitud de crédito (la crea la app tras confirmación nativa) |
 | POST | `/v1/mini-api/credit/quote` | Token delegado | Cotización para la mini app (sistema francés) |
-| POST | `/admin/activity/tick` | `x-admin-key` | Fuerza un movimiento (demo de push) |
+| POST | `/v1/devices` | Bearer | Registra el dispositivo para notificaciones push |
+| DELETE | `/v1/devices/:token` | Bearer | Da de baja el dispositivo (logout) |
+| POST | `/admin/activity/tick` | `x-admin-key` | Fuerza un movimiento y su push (`{ "email": "..." }`) |
 | GET/PUT | `/admin/flags` | `x-admin-key` | Kill switches de la experiencia (insights, promociones, mini apps) |
 | GET/PUT/DELETE | `/admin/chaos` | `x-admin-key` | Inyección de latencia, errores y caídas por servicio |
 
