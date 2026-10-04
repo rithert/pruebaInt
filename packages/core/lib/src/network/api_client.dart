@@ -50,6 +50,15 @@ class ApiClient {
     decode,
   );
 
+  Future<Result<T>> delete<T>(
+    String path, {
+    required JsonDecoder<T> decode,
+    Map<String, Object?>? extra,
+  }) => _send(
+    () => _dio.delete<Object?>(path, options: Options(extra: extra)),
+    decode,
+  );
+
   Future<Result<T>> _send<T>(
     Future<Response<Object?>> Function() request,
     JsonDecoder<T> decode,

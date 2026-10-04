@@ -58,3 +58,42 @@ class DebugTelemetry implements Telemetry {
     developer.log('user=$userId', name: 'telemetry.user');
   }
 }
+
+/// Reenvía a varios destinos (p. ej. consola en debug + Firebase). Un
+/// destino que falla no impide reportar en los demás.
+class CompositeTelemetry implements Telemetry {
+  const CompositeTelemetry(this._targets);
+
+  final List<Telemetry> _targets;
+
+  void _each(void Function(Telemetry target) action) {
+    for (final target in _targets) {
+      try {
+        action(target);
+      } on Object catch (error) {
+        developer.log('destino de telemetría falló', error: error);
+      }
+    }
+  }
+
+  @override
+  void logEvent(String name, [Map<String, Object?> params = const {}]) =>
+      _each((t) => t.logEvent(name, params));
+
+  @override
+  void breadcrumb(String message, {Map<String, Object?> data = const {}}) =>
+      _each((t) => t.breadcrumb(message, data: data));
+
+  @override
+  void recordError(
+    Object error,
+    StackTrace? stackTrace, {
+    String? reason,
+    bool fatal = false,
+  }) => _each(
+    (t) => t.recordError(error, stackTrace, reason: reason, fatal: fatal),
+  );
+
+  @override
+  void setUserId(String? userId) => _each((t) => t.setUserId(userId));
+}

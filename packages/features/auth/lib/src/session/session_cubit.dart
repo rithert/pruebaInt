@@ -61,6 +61,13 @@ class SessionCubit extends Cubit<SessionState> {
   final BiometricAuthenticator _biometrics;
   final Telemetry _telemetry;
   late final StreamSubscription<void> _expiredSub;
+  final List<Future<void> Function()> _beforeEndHooks = [];
+
+  /// Tareas que otros dominios necesitan hacer ANTES de que se borren las
+  /// credenciales (p. ej. dar de baja el dispositivo de las notificaciones,
+  /// que exige sesión). Fallos o demoras nunca bloquean el cierre.
+  void addBeforeEndHook(Future<void> Function() hook) =>
+      _beforeEndHooks.add(hook);
 
   /// Al abrir la app: decide si hay sesión y si debe bloquearse.
   Future<void> restore() async {
@@ -107,6 +114,13 @@ class SessionCubit extends Cubit<SessionState> {
   }
 
   Future<void> _end(SessionEndReason reason) async {
+    for (final hook in _beforeEndHooks) {
+      try {
+        await hook().timeout(const Duration(seconds: 3));
+      } on Object catch (error, stack) {
+        _telemetry.recordError(error, stack, reason: 'session_end_hook');
+      }
+    }
     await _repository.logout();
     _telemetry.setUserId(null);
     emit(

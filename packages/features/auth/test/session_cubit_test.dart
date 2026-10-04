@@ -158,6 +158,21 @@ void main() {
     ],
   );
 
+  test('los hooks de cierre corren ANTES de borrar las credenciales', () async {
+    final order = <String>[];
+    when(() => repository.logout())
+        .thenAnswer((_) async => order.add('logout'));
+    final cubit = build()
+      ..addBeforeEndHook(() async => order.add('baja push'))
+      ..addBeforeEndHook(() async => throw StateError('sin red'));
+
+    await cubit.logout();
+
+    expect(order, ['baja push', 'logout']);
+    expect(cubit.state.status, SessionStatus.unauthenticated);
+    await cubit.close();
+  });
+
   blocTest<SessionCubit, SessionState>(
     'si la red avisa que la sesión expiró → unauthenticated (expired)',
     build: build,
