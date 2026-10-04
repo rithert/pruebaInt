@@ -15,22 +15,33 @@ class ApiClient {
 
   final Dio _dio;
 
+  /// [extra] viaja a los interceptores (p. ej. `AuthInterceptor.skipAuthKey`,
+  /// `RetryInterceptor.disableKey`).
   Future<Result<T>> get<T>(
     String path, {
     required JsonDecoder<T> decode,
     Map<String, Object?>? query,
-  }) => _send(() => _dio.get<Object?>(path, queryParameters: query), decode);
+    Map<String, Object?>? extra,
+  }) => _send(
+    () => _dio.get<Object?>(
+      path,
+      queryParameters: query,
+      options: Options(extra: extra),
+    ),
+    decode,
+  );
 
   Future<Result<T>> post<T>(
     String path, {
     required JsonDecoder<T> decode,
     Object? body,
     Map<String, String>? headers,
+    Map<String, Object?>? extra,
   }) => _send(
     () => _dio.post<Object?>(
       path,
       data: body,
-      options: Options(headers: headers),
+      options: Options(headers: headers, extra: extra),
     ),
     decode,
   );

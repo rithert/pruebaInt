@@ -2,7 +2,7 @@ import 'package:core/core.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../support/fake_adapter.dart';
+import 'package:core/testing.dart';
 
 void main() {
   late FakeAdapter adapter;
