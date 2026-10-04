@@ -1,14 +1,19 @@
+import 'package:accounts/accounts.dart';
 import 'package:auth/auth.dart';
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 
 import '../router/app_routes.dart';
 
-/// Home provisional hasta F4/F5 (cuentas + experiencia personalizada).
-class HomePlaceholderPage extends StatelessWidget {
-  const HomePlaceholderPage({super.key});
+/// Home del cliente. En F5 su contenido pasa a definirlo el servidor
+/// (experiencia personalizada); por ahora compone las secciones fijas.
+class HomePage extends StatelessWidget {
+  const HomePage({required this.di, super.key});
+
+  final GetIt di;
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +21,7 @@ class HomePlaceholderPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Inicio'),
+        title: Text('Hola, ${user?.firstName ?? ''}'),
         actions: [
           IconButton(
             tooltip: 'Diagnóstico',
@@ -31,16 +36,8 @@ class HomePlaceholderPage extends StatelessWidget {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        children: [
-          Text(
-            'Hola, ${user?.firstName ?? ''}',
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          if (user != null)
-            Text('Tu objetivo: ${user.goal.title} · segmento ${user.segment}'),
-        ],
+        padding: const EdgeInsets.all(AppSpacing.md),
+        children: [AccountsModule.overview(di)],
       ),
     );
   }

@@ -6,7 +6,10 @@ import 'package:super_app/router/session_redirect.dart';
 void main() {
   group('sessionRedirect', () {
     test('mientras se restaura la sesión, todo va al splash', () {
-      expect(sessionRedirect(SessionStatus.unknown, AppRoutes.home), AppRoutes.splash);
+      expect(
+        sessionRedirect(SessionStatus.unknown, AppRoutes.home),
+        AppRoutes.splash,
+      );
       expect(sessionRedirect(SessionStatus.unknown, AppRoutes.splash), isNull);
     });
 
@@ -26,7 +29,10 @@ void main() {
     });
 
     test('bloqueada: cualquier ruta va al desbloqueo', () {
-      expect(sessionRedirect(SessionStatus.locked, AppRoutes.home), AuthRoutes.unlock);
+      expect(
+        sessionRedirect(SessionStatus.locked, AppRoutes.home),
+        AuthRoutes.unlock,
+      );
       expect(sessionRedirect(SessionStatus.locked, AuthRoutes.unlock), isNull);
     });
 

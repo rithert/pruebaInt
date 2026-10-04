@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import '../diagnostics/diagnostics_cubit.dart';
 import '../diagnostics/diagnostics_page.dart';
-import '../home/home_placeholder_page.dart';
+import '../home/home_page.dart';
 import 'app_routes.dart';
 import 'session_redirect.dart';
 import 'stream_listenable.dart';
@@ -37,7 +37,7 @@ GoRouter createRouter({
       ),
       GoRoute(
         path: AppRoutes.home,
-        builder: (context, state) => const HomePlaceholderPage(),
+        builder: (context, state) => HomePage(di: di),
       ),
       GoRoute(
         path: AppRoutes.diagnostics,

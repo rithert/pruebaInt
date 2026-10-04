@@ -11,18 +11,14 @@ String? sessionRedirect(SessionStatus status, String location) {
   final isAlwaysAllowed = location == AppRoutes.diagnostics;
 
   return switch (status) {
-    SessionStatus.unknown => location == AppRoutes.splash
-        ? null
-        : AppRoutes.splash,
+    SessionStatus.unknown =>
+      location == AppRoutes.splash ? null : AppRoutes.splash,
     SessionStatus.unauthenticated =>
       isPublic || isAlwaysAllowed ? null : AuthRoutes.login,
-    SessionStatus.locked => location == AuthRoutes.unlock
-        ? null
-        : AuthRoutes.unlock,
+    SessionStatus.locked =>
+      location == AuthRoutes.unlock ? null : AuthRoutes.unlock,
     SessionStatus.authenticated =>
-      isPublic ||
-              location == AuthRoutes.unlock ||
-              location == AppRoutes.splash
+      isPublic || location == AuthRoutes.unlock || location == AppRoutes.splash
           ? AppRoutes.home
           : null,
   };
