@@ -13,6 +13,9 @@ abstract final class AppTheme {
     final scheme = ColorScheme.fromSeed(
       seedColor: AppColors.brand,
       brightness: brightness,
+      // `fidelity` mantiene el primario cerca del naranja de marca; la
+      // variante por defecto lo apagaría hacia un marrón.
+      dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
       error: AppColors.danger,
     );
     final shape = RoundedRectangleBorder(

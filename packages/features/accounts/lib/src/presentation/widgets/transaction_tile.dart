@@ -40,7 +40,9 @@ class TransactionTile extends StatelessWidget {
         trailing: Text(
           amount,
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            color: tx.isCredit ? AppColors.credit : scheme.onSurface,
+            color: tx.isCredit
+                ? AppColors.creditFor(context)
+                : scheme.onSurface,
             fontWeight: FontWeight.w600,
           ),
         ),
