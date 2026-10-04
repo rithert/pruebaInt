@@ -52,7 +52,7 @@ jobs:
           flutter pub get
           dart pub global activate melos 8.9.0
       - name: Formato
-        run: dart format --output=none --set-exit-if-changed .
+        run: melos run format:check
       - name: Análisis estático
         run: dart analyze --fatal-infos .
       - name: Tests (unitarios y de widgets) con cobertura

@@ -45,9 +45,8 @@ void main() {
     biometrics = _MockBiometrics();
     events = SessionEvents();
     when(() => repository.logout()).thenAnswer((_) async {});
-    when(
-      () => repository.fetchProfile(),
-    ).thenAnswer((_) async => const Success(_user));
+    when(() => repository.fetchProfile())
+        .thenAnswer((_) async => const Success(_user));
     when(() => repository.cachedProfile()).thenAnswer((_) async => _user);
   });
 
@@ -58,9 +57,8 @@ void main() {
     sessionEvents: events,
   );
 
-  void storedSession(bool value) => when(
-    () => repository.hasStoredSession(),
-  ).thenAnswer((_) async => value);
+  void storedSession(bool value) =>
+      when(() => repository.hasStoredSession()).thenAnswer((_) async => value);
 
   void biometricsAvailable(bool value) =>
       when(() => biometrics.isAvailable()).thenAnswer((_) async => value);
@@ -104,9 +102,9 @@ void main() {
   group('desbloqueo', () {
     blocTest<SessionCubit, SessionState>(
       'huella correcta → authenticated',
-      setUp: () => when(
-        () => biometrics.authenticate(reason: any(named: 'reason')),
-      ).thenAnswer((_) async => true),
+      setUp: () =>
+          when(() => biometrics.authenticate(reason: any(named: 'reason')))
+              .thenAnswer((_) async => true),
       build: build,
       seed: () => const SessionState(status: SessionStatus.locked, user: _user),
       act: (cubit) => cubit.unlock(),
@@ -117,9 +115,9 @@ void main() {
 
     blocTest<SessionCubit, SessionState>(
       'huella cancelada → sigue bloqueada',
-      setUp: () => when(
-        () => biometrics.authenticate(reason: any(named: 'reason')),
-      ).thenAnswer((_) async => false),
+      setUp: () =>
+          when(() => biometrics.authenticate(reason: any(named: 'reason')))
+              .thenAnswer((_) async => false),
       build: build,
       seed: () => const SessionState(status: SessionStatus.locked, user: _user),
       act: (cubit) => cubit.unlock(),

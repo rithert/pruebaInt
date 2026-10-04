@@ -35,7 +35,8 @@ class _LoginPageState extends State<LoginPage> {
         child: BlocConsumer<LoginCubit, LoginState>(
           // El cubit borra la contraseña tras un fallo: se refleja en el campo.
           listenWhen: (prev, next) => next.password != _passwordController.text,
-          listener: (context, state) => _passwordController.text = state.password,
+          listener: (context, state) =>
+              _passwordController.text = state.password,
           builder: (context, state) {
             final submitting = state.status == LoginStatus.submitting;
             return AutofillGroup(

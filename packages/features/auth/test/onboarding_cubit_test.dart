@@ -114,8 +114,10 @@ void main() {
     blocTest<OnboardingCubit, OnboardingState>(
       'paso 1 válido: avanza al objetivo',
       build: build,
-      seed: () =>
-          const OnboardingState(fullName: 'Ana Gómez', email: 'ana@example.com'),
+      seed: () => const OnboardingState(
+        fullName: 'Ana Gómez',
+        email: 'ana@example.com',
+      ),
       act: (cubit) => cubit.next(),
       expect: () => [
         const OnboardingState(
@@ -290,9 +292,7 @@ void main() {
       act: (cubit) => cubit.submit(),
       expect: () => [
         _filled.copyWith(status: OnboardingStatus.submitting),
-        _filled.copyWith(
-          fieldErrors: {OnboardingField.password: 'Muy común'},
-        ),
+        _filled.copyWith(fieldErrors: {OnboardingField.password: 'Muy común'}),
       ],
     );
 

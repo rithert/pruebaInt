@@ -1,73 +1,43 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "pruebaFlutterInt",
-            "request": "launch",
-            "type": "dart"
-        },
-        {
-            "name": "super_app",
-            "cwd": "apps\\super_app",
-            "request": "launch",
-            "type": "dart"
-        },
-        {
-            "name": "super_app (profile mode)",
-            "cwd": "apps\\super_app",
-            "request": "launch",
-            "type": "dart",
-            "flutterMode": "profile"
-        },
-        {
-            "name": "super_app (release mode)",
-            "cwd": "apps\\super_app",
-            "request": "launch",
-            "type": "dart",
-            "flutterMode": "release"
-        },
-        {
-            "name": "core",
-            "cwd": "packages\\core",
-            "request": "launch",
-            "type": "dart"
-        },
-        {
-            "name": "core (profile mode)",
-            "cwd": "packages\\core",
-            "request": "launch",
-            "type": "dart",
-            "flutterMode": "profile"
-        },
-        {
-            "name": "core (release mode)",
-            "cwd": "packages\\core",
-            "request": "launch",
-            "type": "dart",
-            "flutterMode": "release"
-        },
-        {
-            "name": "design_system",
-            "cwd": "packages\\design_system",
-            "request": "launch",
-            "type": "dart"
-        },
-        {
-            "name": "design_system (profile mode)",
-            "cwd": "packages\\design_system",
-            "request": "launch",
-            "type": "dart",
-            "flutterMode": "profile"
-        },
-        {
-            "name": "design_system (release mode)",
-            "cwd": "packages\\design_system",
-            "request": "launch",
-            "type": "dart",
-            "flutterMode": "release"
-        }
-    ]
+  // Lanzadores del proyecto. Para la demo: "BFF + App" levanta todo con F5.
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "App (dev · teléfono USB)",
+      "type": "dart",
+      "request": "launch",
+      "cwd": "apps/super_app",
+      "program": "lib/main.dart",
+      // Redirige el puerto 3000 del teléfono al PC antes de lanzar la app.
+      "preLaunchTask": "adb reverse 3000",
+      "toolArgs": ["--dart-define=ENV=dev"]
+    },
+    {
+      "name": "App (profile · medir rendimiento)",
+      "type": "dart",
+      "request": "launch",
+      "cwd": "apps/super_app",
+      "program": "lib/main.dart",
+      "flutterMode": "profile",
+      "preLaunchTask": "adb reverse 3000",
+      "toolArgs": ["--dart-define=ENV=dev"]
+    },
+    {
+      "name": "BFF (Node · watch)",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/backend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    }
+  ],
+  "compounds": [
+    {
+      "name": "BFF + App",
+      "configurations": ["BFF (Node · watch)", "App (dev · teléfono USB)"],
+      "stopAll": true
+    }
+  ]
 }

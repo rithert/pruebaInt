@@ -16,7 +16,9 @@ abstract final class Validators {
 
   static String? password(String value) {
     if (value.length < 8) return 'Usa al menos 8 caracteres.';
-    if (!value.contains(RegExp('[A-Za-z]'))) return 'Incluye al menos una letra.';
+    if (!value.contains(RegExp('[A-Za-z]'))) {
+      return 'Incluye al menos una letra.';
+    }
     if (!value.contains(RegExp(r'\d'))) return 'Incluye al menos un número.';
     return null;
   }

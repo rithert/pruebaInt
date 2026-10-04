@@ -38,8 +38,7 @@ class OnboardingPage extends StatelessWidget {
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(4),
               child: Semantics(
-                label:
-                    'Paso ${state.stepNumber} de ${OnboardingStep.total}',
+                label: 'Paso ${state.stepNumber} de ${OnboardingStep.total}',
                 child: LinearProgressIndicator(
                   value: state.stepNumber / OnboardingStep.total,
                 ),
