@@ -15,6 +15,7 @@ Plataforma financiera digital, sin atención física, construida en **Flutter** 
 apps/super_app/          Shell: compone los módulos de dominio
 packages/core/           Red y resiliencia, caché offline (Drift), sesión, observabilidad, contrato de módulos
 packages/design_system/  Tokens, tema y componentes accesibles
+packages/features/auth/  Onboarding, login, sesión y desbloqueo biométrico
 backend/                 BFF (Fastify + TypeScript + SQLite)
 docs/                    Arquitectura, ADRs, operación, uso de IA
 ```
