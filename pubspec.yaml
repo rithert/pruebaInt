@@ -11,6 +11,8 @@ workspace:
   - apps/super_app
   - packages/core
   - packages/design_system
+  - packages/sdui
+  - packages/features/home
   - packages/features/auth
   - packages/features/accounts
 
