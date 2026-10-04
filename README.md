@@ -15,8 +15,10 @@ Plataforma financiera digital, sin atención física, construida en **Flutter** 
 apps/super_app/          Shell: compone los módulos de dominio
 packages/core/           Red y resiliencia, caché offline (Drift), sesión, observabilidad, contrato de módulos
 packages/design_system/  Tokens, tema y componentes accesibles
+packages/sdui/           Motor de Server-Driven UI (parser, catálogo, render aislado)
 packages/features/auth/  Onboarding, login, sesión y desbloqueo biométrico
 packages/features/accounts/  Saldos, movimientos y transferencias entre cuentas propias
+packages/features/home/  Home personalizado dirigido por el servidor y eventos de uso
 backend/                 BFF (Fastify + TypeScript + SQLite)
 docs/                    Arquitectura, ADRs, operación, uso de IA
 ```
@@ -85,7 +87,10 @@ Todas las respuestas de error usan el formato `{ error: { code, message, correla
 | GET | `/v1/accounts/:id/transactions` | Bearer | Movimientos paginados por cursor (`limit`, `cursor`, `category`) |
 | GET | `/v1/transactions/:id` | Bearer | Detalle de un movimiento |
 | POST | `/v1/transfers` | Bearer + `Idempotency-Key` | Transferencia entre cuentas propias |
+| GET | `/v1/experience/home` | Bearer | Layout SDUI personalizado (reglas + datos reales + comportamiento) |
+| POST | `/v1/events` | Bearer | Eventos de uso por lotes (`tapped`, `dismissed`) |
 | POST | `/admin/activity/tick` | `x-admin-key` | Fuerza un movimiento (demo de push) |
+| GET/PUT | `/admin/flags` | `x-admin-key` | Kill switches de la experiencia (insights, promociones, mini apps) |
 | GET/PUT/DELETE | `/admin/chaos` | `x-admin-key` | Inyección de latencia, errores y caídas por servicio |
 
 La configuración del backend está en [backend/.env.example](backend/.env.example).
