@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sdui/sdui.dart';
 
 import 'accounts_routes.dart';
 import 'data/accounts_api_repository.dart';
@@ -16,12 +17,15 @@ import 'presentation/transactions/transactions_page.dart';
 import 'presentation/transfer/transfer_cubit.dart';
 import 'presentation/transfer/transfer_page.dart';
 
-class AccountsModule implements FeatureModule {
+class AccountsModule implements FeatureModule, SduiContributor {
+  late GetIt _di;
+
   @override
   String get name => 'accounts';
 
   @override
   void registerDependencies(GetIt di) {
+    _di = di;
     di.registerLazySingleton<AccountsRepository>(
       () => AccountsApiRepository(
         api: di<ApiClient>(),
@@ -31,8 +35,15 @@ class AccountsModule implements FeatureModule {
     );
   }
 
-  /// Resumen de cuentas listo para insertar en el home (o en un componente
-  /// de la experiencia dinámica en F5).
+  /// Aporta el componente `accounts_summary` al catálogo SDUI: el servidor
+  /// decide si y dónde aparece el resumen de cuentas en el home.
+  @override
+  void registerSduiComponents(SduiRegistry registry) => registry.register(
+    'accounts_summary',
+    (context, component, actions) => overview(_di),
+  );
+
+  /// Resumen de cuentas autocontenido (con su propio cubit).
   static Widget overview(GetIt di) => BlocProvider(
     create: (_) => AccountsCubit(
       repository: di<AccountsRepository>(),

@@ -24,6 +24,10 @@ dependencies:
     path: ../../packages/features/auth
   accounts:
     path: ../../packages/features/accounts
+  sdui:
+    path: ../../packages/sdui
+  home:
+    path: ../../packages/features/home
 
 dev_dependencies:
   flutter_test:

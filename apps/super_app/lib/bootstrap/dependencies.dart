@@ -1,5 +1,6 @@
 import 'package:core/core.dart';
 import 'package:get_it/get_it.dart';
+import 'package:sdui/sdui.dart';
 
 import 'session_refresher.dart';
 
@@ -46,5 +47,14 @@ GetIt configureDependencies({
   for (final module in modules) {
     module.registerDependencies(di);
   }
+
+  // Catálogo SDUI: cada dominio aporta sus componentes. Lo que no esté aquí,
+  // el servidor no lo puede mostrar.
+  final registry = SduiRegistry();
+  for (final contributor in modules.whereType<SduiContributor>()) {
+    contributor.registerSduiComponents(registry);
+  }
+  di.registerSingleton<SduiRegistry>(registry);
+
   return di;
 }

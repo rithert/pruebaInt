@@ -5,6 +5,7 @@ import 'package:accounts/accounts.dart';
 import 'package:auth/auth.dart';
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:home/home.dart';
 
 import 'app.dart';
 import 'bootstrap/dependencies.dart';
@@ -12,7 +13,11 @@ import 'router/app_router.dart';
 
 /// Módulos de dominio que componen la app. Agregar un dominio nuevo es
 /// agregarlo a esta lista (y en el futuro, habilitarlo por feature flag).
-final List<FeatureModule> _modules = [AuthModule(), AccountsModule()];
+final List<FeatureModule> _modules = [
+  AuthModule(),
+  AccountsModule(),
+  HomeModule(),
+];
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

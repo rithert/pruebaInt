@@ -1,5 +1,5 @@
-name: accounts
-description: "Dominio de cuentas: saldos, movimientos y transferencias entre cuentas propias."
+name: home
+description: "Home dirigido por el servidor: experiencia personalizada, componentes SDUI y eventos de uso."
 version: 0.1.0
 publish_to: none
 
@@ -16,13 +16,12 @@ dependencies:
     path: ../../core
   design_system:
     path: ../../design_system
-  flutter_bloc: ^9.1.1
-  equatable: ^3.0.0
-  go_router: ^18.0.2
-  get_it: ^9.3.0
-  uuid: ^4.6.0
   sdui:
     path: ../../sdui
+  flutter_bloc: ^9.1.1
+  equatable: ^3.0.0
+  get_it: ^9.3.0
+  go_router: ^18.0.2
 
 dev_dependencies:
   flutter_test:

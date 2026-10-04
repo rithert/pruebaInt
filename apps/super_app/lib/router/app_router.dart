@@ -4,10 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:home/home.dart';
+import 'package:sdui/sdui.dart';
 
 import '../diagnostics/diagnostics_cubit.dart';
 import '../diagnostics/diagnostics_page.dart';
-import '../home/home_page.dart';
 import 'app_routes.dart';
 import 'session_redirect.dart';
 import 'stream_listenable.dart';
@@ -37,7 +38,29 @@ GoRouter createRouter({
       ),
       GoRoute(
         path: AppRoutes.home,
-        builder: (context, state) => HomePage(di: di),
+        builder: (context, state) => BlocProvider(
+          create: (_) => HomeCubit(
+            repository: di<HomeRepository>(),
+            tracker: di<EventTracker>(),
+            connectivity: di<ConnectivityMonitor>(),
+          )..refresh(),
+          child: HomePage(
+            registry: di<SduiRegistry>(),
+            telemetry: di<Telemetry>(),
+            appBarActions: [
+              IconButton(
+                tooltip: 'Diagnóstico',
+                icon: const Icon(Icons.monitor_heart_outlined),
+                onPressed: () => context.push(AppRoutes.diagnostics),
+              ),
+              IconButton(
+                tooltip: 'Cerrar sesión',
+                icon: const Icon(Icons.logout),
+                onPressed: session.logout,
+              ),
+            ],
+          ),
+        ),
       ),
       GoRoute(
         path: AppRoutes.diagnostics,
