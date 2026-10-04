@@ -28,6 +28,8 @@ dependencies:
     path: ../../packages/sdui
   home:
     path: ../../packages/features/home
+  mini_apps:
+    path: ../../packages/features/mini_apps
 
 dev_dependencies:
   flutter_test:

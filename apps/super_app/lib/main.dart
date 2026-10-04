@@ -5,7 +5,9 @@ import 'package:accounts/accounts.dart';
 import 'package:auth/auth.dart';
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:home/home.dart';
+import 'package:mini_apps/mini_apps.dart';
 
 import 'app.dart';
 import 'bootstrap/dependencies.dart';
@@ -17,6 +19,11 @@ final List<FeatureModule> _modules = [
   AuthModule(),
   AccountsModule(),
   HomeModule(),
+  // El shell conecta dominios: la mini app recibe el nombre desde la sesión
+  // sin que su módulo dependa del módulo de auth.
+  MiniAppsModule(
+    firstName: () => GetIt.instance<SessionCubit>().state.user?.firstName,
+  ),
 ];
 
 void main() {

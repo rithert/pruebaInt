@@ -43,7 +43,7 @@ AppFailure _fromResponse(Response<Object?> response, String? correlationId) {
     ),
     401 => UnauthorizedFailure(code: code, correlationId: correlationId),
     404 => NotFoundFailure(correlationId: correlationId),
-    409 || 422 || 429 => BusinessFailure(
+    403 || 409 || 422 || 429 => BusinessFailure(
       code: code,
       serverMessage: message ?? 'No fue posible completar la operación.',
       correlationId: correlationId,

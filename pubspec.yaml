@@ -13,6 +13,7 @@ workspace:
   - packages/design_system
   - packages/sdui
   - packages/features/home
+  - packages/features/mini_apps
   - packages/features/auth
   - packages/features/accounts
 

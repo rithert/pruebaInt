@@ -104,6 +104,17 @@ void main() {
       expect(failure.message, 'Saldo insuficiente.');
     });
 
+    test(
+      '403 → BusinessFailure conserva el código (p. ej. kill switch)',
+      () async {
+        adapter.enqueueError(403, 'mini_app_disabled');
+
+        final failure = await failureOf(getAccounts()) as BusinessFailure;
+
+        expect(failure.code, 'mini_app_disabled');
+      },
+    );
+
     test('503 → ServiceUnavailableFailure (transitoria)', () async {
       adapter.enqueueError(503, 'service_unavailable');
 
