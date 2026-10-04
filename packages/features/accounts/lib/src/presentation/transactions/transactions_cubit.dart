@@ -1,7 +1,4 @@
-// TEMPORAL: los campos se usan al implementar los métodos. Quitar esta línea
-// junto con la implementación.
-// ignore_for_file: unused_field
-
+import 'package:core/core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/accounts_repository.dart';
@@ -29,7 +26,42 @@ class TransactionsCubit extends Cubit<TransactionsState> {
   ///    `Failure` → `failure` con la falla.
   /// En ambos casos, los errores y marcas anteriores quedan limpios.
   Future<void> load() async {
-    throw UnimplementedError('TODO: load');
+    final currentCategory = state.category;
+
+    emit(
+      TransactionsState(
+        status: TransactionsStatus.loading,
+        category: currentCategory,
+      ),
+    );
+
+    final result = await _repository.transactions(
+      _accountId,
+      category: currentCategory,
+    );
+
+    if (state.category != currentCategory) return;
+
+    switch (result) {
+      case Success(value: final page):
+        emit(
+          TransactionsState(
+            status: TransactionsStatus.success,
+            category: currentCategory,
+            items: page.items,
+            nextCursor: page.nextCursor,
+            cachedAt: page.cachedAt,
+          ),
+        );
+      case Failure(:final failure):
+        emit(
+          TransactionsState(
+            status: TransactionsStatus.failure,
+            category: currentCategory,
+            failure: failure,
+          ),
+        );
+    }
   }
 
   /// Pull-to-refresh: pide la primera página SIN emitir `loading` (la lista
@@ -37,7 +69,30 @@ class TransactionsCubit extends Cubit<TransactionsState> {
   /// - `Success` → reemplaza items, cursor y `cachedAt`.
   /// - `Failure` → conserva todo y solo asigna `failure`.
   Future<void> refresh() async {
-    throw UnimplementedError('TODO: refresh');
+    final currentCategory = state.category;
+
+    final result = await _repository.transactions(
+      _accountId,
+      category: currentCategory,
+    );
+
+    if (state.category != currentCategory) return;
+
+    switch (result) {
+      case Success(value: final page):
+        emit(
+          state.copyWith(
+            status: TransactionsStatus.success,
+            items: page.items,
+            nextCursor: () => page.nextCursor,
+            cachedAt: () => page.cachedAt,
+            failure: () => null,
+            loadMoreFailure: () => null,
+          ),
+        );
+      case Failure(:final failure):
+        emit(state.copyWith(failure: () => failure));
+    }
   }
 
   /// Siguiente página. Solo si `status == success`, hay `nextCursor` y no hay
@@ -46,7 +101,40 @@ class TransactionsCubit extends Cubit<TransactionsState> {
   /// 2. `Success` → agrega los items al final y actualiza `nextCursor`.
   ///    `Failure` → conserva los items y asigna `loadMoreFailure`.
   Future<void> loadMore() async {
-    throw UnimplementedError('TODO: loadMore');
+    if (state.status != TransactionsStatus.success ||
+        state.nextCursor == null ||
+        state.isLoadingMore) {
+      return;
+    }
+
+    final currentCategory = state.category;
+    final cursor = state.nextCursor;
+
+    emit(state.copyWith(isLoadingMore: true, loadMoreFailure: () => null));
+
+    final result = await _repository.transactions(
+      _accountId,
+      cursor: cursor,
+      category: currentCategory,
+    );
+
+    if (state.category != currentCategory) return;
+
+    switch (result) {
+      case Success(value: final page):
+        emit(
+          state.copyWith(
+            isLoadingMore: false,
+            items: [...state.items, ...page.items],
+            nextCursor: () => page.nextCursor,
+            loadMoreFailure: () => null,
+          ),
+        );
+      case Failure(:final failure):
+        emit(
+          state.copyWith(isLoadingMore: false, loadMoreFailure: () => failure),
+        );
+    }
   }
 
   /// Cambia el filtro (`null` = todas). Si es el mismo, no hace nada.
@@ -56,6 +144,12 @@ class TransactionsCubit extends Cubit<TransactionsState> {
   /// curso, al llegar su respuesta `state.category` ya es otra y esa
   /// respuesta debe descartarse (aplica a load, refresh y loadMore).
   Future<void> categorySelected(String? category) async {
-    throw UnimplementedError('TODO: categorySelected');
+    if (state.category == category) return;
+
+    emit(
+      TransactionsState(status: TransactionsStatus.loading, category: category),
+    );
+
+    await load();
   }
 }
