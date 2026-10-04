@@ -16,6 +16,7 @@ apps/super_app/          Shell: compone los módulos de dominio
 packages/core/           Red y resiliencia, caché offline (Drift), sesión, observabilidad, contrato de módulos
 packages/design_system/  Tokens, tema y componentes accesibles
 packages/features/auth/  Onboarding, login, sesión y desbloqueo biométrico
+packages/features/accounts/  Saldos, movimientos y transferencias entre cuentas propias
 backend/                 BFF (Fastify + TypeScript + SQLite)
 docs/                    Arquitectura, ADRs, operación, uso de IA
 ```
@@ -54,6 +55,10 @@ fvm flutter run                 # usa http://localhost:3000 por defecto
 ```
 
 > `adb reverse` se pierde al desconectar el cable o reiniciar adb: si la app muestra "Sin conexión", vuelve a ejecutarlo. Para un teléfono físico, activa **Opciones de desarrollador → Depuración por USB** y acepta la huella del PC al conectarlo.
+
+### Desde VS Code (recomendado)
+
+En *Run and Debug* (`Ctrl+Shift+D`), elige **"BFF + App"** y presiona **F5**: levanta el BFF en modo watch, ejecuta `adb reverse` y lanza la app en el dispositivo conectado. También hay lanzadores individuales: *App (dev)*, *App (profile)* y *BFF*.
 
 Para apuntar la app a otro backend: `fvm flutter run --dart-define=API_BASE_URL=https://mi-bff.example.com`.
 
