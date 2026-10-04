@@ -5,6 +5,7 @@
 /// accesibilidad (contraste AA, áreas táctiles >= 48dp, escalado de texto).
 library;
 
+export 'src/components/inline_message.dart';
 export 'src/theme/app_theme.dart';
 export 'src/tokens/app_colors.dart';
 export 'src/tokens/app_spacing.dart';
