@@ -16,6 +16,8 @@ export interface AppConfig {
   chaosEnabled: boolean;
   /** Orígenes web de mini apps autorizados por CORS. */
   miniAppOrigins: string[];
+  /** Credenciales de Firebase Admin para push. Sin archivo, push desactivado. */
+  firebaseServiceAccountPath?: string;
 }
 
 const DEV_JWT_SECRET = 'dev-only-secret-change-me-0123456789abcdef';
@@ -49,6 +51,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
       .split(',')
       .map((origin) => origin.trim())
       .filter(Boolean),
+    firebaseServiceAccountPath:
+      env.FIREBASE_SERVICE_ACCOUNT_PATH ??
+      (nodeEnv === 'test' ? undefined : './firebase-service-account.json'),
   };
 }
 

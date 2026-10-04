@@ -92,6 +92,18 @@ describe('ActivityEngine', () => {
     expect(created[0]!.amount_minor).toBeGreaterThan(0);
   });
 
+  it('el endpoint de administración acepta el correo del cliente', async () => {
+    await registerUser(ctx.app);
+    const response = await ctx.app.inject({
+      method: 'POST',
+      url: '/admin/activity/tick',
+      headers: { 'x-admin-key': 'dev-admin-key' },
+      payload: { email: 'ANA@example.com' },
+    });
+
+    expect(response.json().created).toHaveLength(1);
+  });
+
   it('el endpoint de administración exige la clave', async () => {
     const response = await ctx.app.inject({
       method: 'POST',

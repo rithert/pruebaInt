@@ -9,6 +9,7 @@ import { activityAdminRoutes } from './modules/activity/activity.routes.js';
 import { experienceRoutes, flagsAdminRoutes } from './modules/experience/experience.routes.js';
 import { authGuard } from './modules/auth/auth.guard.js';
 import { miniAppsHostRoutes, miniAppsPublicRoutes } from './modules/mini-apps/mini-apps.routes.js';
+import { devicesRoutes } from './modules/notifications/notifications.js';
 import { authRoutes, meRoutes } from './modules/auth/auth.routes.js';
 import { transfersRoutes } from './modules/transfers/transfers.routes.js';
 import { registerErrorHandler } from './shared/errors.js';
@@ -84,6 +85,7 @@ export async function buildApp(deps: Deps, options: AppOptions = {}): Promise<Fa
       await scope.register(transfersRoutes, { deps });
       await scope.register(experienceRoutes, { deps });
       await scope.register(miniAppsHostRoutes, { deps });
+      await scope.register(devicesRoutes, { deps });
     },
     { prefix: '/v1' },
   );

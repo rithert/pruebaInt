@@ -1,10 +1,17 @@
 import { buildApp } from './app.js';
 import { loadConfig } from './config.js';
 import { createDeps } from './container.js';
+import { registerPushNotifications } from './modules/notifications/notifications.js';
+import { createPushSender } from './modules/notifications/push-sender.js';
 
 const config = loadConfig();
 const deps = createDeps(config);
 const app = await buildApp(deps);
+
+// Push: FCM si hay credenciales; si no, solo se registra en el log.
+const pushSender = createPushSender(config.firebaseServiceAccountPath, app.log);
+registerPushNotifications(deps.db, deps.events, pushSender, app.log);
+app.log.info({ push: pushSender.enabled ? 'fcm' : 'deshabilitado' }, 'notificaciones');
 
 deps.activityEngine.start(config.activityIntervalMs);
 
