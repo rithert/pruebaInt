@@ -12,6 +12,7 @@ workspace:
   - packages/core
   - packages/design_system
   - packages/features/auth
+  - packages/features/accounts
 
 dev_dependencies:
   flutter_lints: ^6.0.0
@@ -27,7 +28,9 @@ melos:
       run: dart analyze --fatal-infos .
     format:check:
       description: Verifica formato sin modificar archivos.
-      run: dart format --output=none --set-exit-if-changed .
+      # Rutas explícitas: `.` recorrería apps/super_app/build (salida de
+      # Gradle), cuyas rutas superan el límite de Windows.
+      run: dart format --output=none --set-exit-if-changed apps/super_app/lib apps/super_app/test packages
     test:
       description: Corre tests de todos los paquetes Flutter que tengan carpeta test/.
       exec: flutter test --coverage
