@@ -4,6 +4,18 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:core/testing.dart';
 
+class _FixedConnectivity implements ConnectivityMonitor {
+  _FixedConnectivity({required this.online});
+
+  final bool online;
+
+  @override
+  Future<bool> get isOnline async => online;
+
+  @override
+  Stream<bool> get onStatusChange => const Stream.empty();
+}
+
 void main() {
   late FakeAdapter adapter;
   late ApiClient client;
@@ -122,6 +134,33 @@ void main() {
       });
 
       expect((await failureOf(getAccounts())).correlationId, 'corr-123');
+    });
+  });
+
+  group('sin respuesta del servidor', () {
+    ApiClient clientWith({required bool online}) => ApiClient(
+      Dio(BaseOptions(baseUrl: 'https://api.test'))
+        ..httpClientAdapter = adapter,
+      connectivity: _FixedConnectivity(online: online),
+    );
+
+    test('sin red en el dispositivo → NoConnectionFailure', () async {
+      adapter.enqueueTransportError(DioExceptionType.connectionError);
+
+      final result = await clientWith(online: false)
+          .get('/v1/accounts', decode: (json) => json);
+
+      expect((result as Failure).failure, isA<NoConnectionFailure>());
+    });
+
+    test('CON red pero el servidor no responde → ServiceUnavailableFailure '
+        '(no se le pide al usuario revisar su internet)', () async {
+      adapter.enqueueTransportError(DioExceptionType.connectionError);
+
+      final result = await clientWith(online: true)
+          .get('/v1/accounts', decode: (json) => json);
+
+      expect((result as Failure).failure, isA<ServiceUnavailableFailure>());
     });
   });
 

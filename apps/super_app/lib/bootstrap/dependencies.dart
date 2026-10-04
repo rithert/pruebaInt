@@ -29,6 +29,7 @@ GetIt configureDependencies({
     onSessionExpired: sessionEvents.notifyExpired,
   );
   final cacheStore = DriftCacheStore(database);
+  final connectivity = PlusConnectivityMonitor();
 
   di
     ..registerSingleton<AppEnvironment>(environment)
@@ -39,8 +40,8 @@ GetIt configureDependencies({
     ..registerSingleton<AppDatabase>(database, dispose: (db) => db.close())
     ..registerSingleton<CacheStore>(cacheStore)
     ..registerSingleton<CachedFetcher>(CachedFetcher(cacheStore))
-    ..registerSingleton<ConnectivityMonitor>(PlusConnectivityMonitor())
-    ..registerSingleton<ApiClient>(ApiClient(dio));
+    ..registerSingleton<ConnectivityMonitor>(connectivity)
+    ..registerSingleton<ApiClient>(ApiClient(dio, connectivity: connectivity));
 
   for (final module in modules) {
     module.registerDependencies(di);

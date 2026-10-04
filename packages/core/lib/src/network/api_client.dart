@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 
+import '../connectivity/connectivity_monitor.dart';
 import '../result/app_failure.dart';
 import '../result/result.dart';
 import 'failure_mapper.dart';
@@ -11,9 +12,12 @@ typedef JsonDecoder<T> = T Function(Object? json);
 /// lanza. La resiliencia (reintentos, circuit breaker, refresh de sesión)
 /// vive en los interceptores del `Dio` que recibe.
 class ApiClient {
-  ApiClient(this._dio);
+  /// [connectivity] permite distinguir "el teléfono no tiene red" de "hay
+  /// red, pero el servidor no responde" (caída del BFF, VPN, portal cautivo).
+  ApiClient(this._dio, {this._connectivity});
 
   final Dio _dio;
+  final ConnectivityMonitor? _connectivity;
 
   /// [extra] viaja a los interceptores (p. ej. `AuthInterceptor.skipAuthKey`,
   /// `RetryInterceptor.disableKey`).
@@ -54,7 +58,7 @@ class ApiClient {
     try {
       response = await request();
     } on DioException catch (exception) {
-      return Failure(mapDioException(exception));
+      return Failure(await _refine(mapDioException(exception)));
     }
 
     try {
@@ -68,5 +72,16 @@ class ApiClient {
         ),
       );
     }
+  }
+
+  /// Sin conexión con el servidor pero CON red en el dispositivo: el
+  /// problema es del servicio. Decirle al usuario "revisa tu internet" lo
+  /// mandaría a buscar una falla que no existe.
+  Future<AppFailure> _refine(AppFailure failure) async {
+    if (failure is NoConnectionFailure &&
+        await (_connectivity?.isOnline ?? Future.value(false))) {
+      return ServiceUnavailableFailure(correlationId: failure.correlationId);
+    }
+    return failure;
   }
 }
