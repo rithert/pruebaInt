@@ -14,6 +14,7 @@ workspace:
   - packages/sdui
   - packages/features/home
   - packages/features/mini_apps
+  - packages/features/notifications
   - packages/features/auth
   - packages/features/accounts
 
@@ -39,12 +40,18 @@ melos:
       run: dart format --output=none --set-exit-if-changed apps/super_app/lib apps/super_app/test packages
     test:
       description: Corre tests de todos los paquetes Flutter que tengan carpeta test/.
-      exec: flutter test --coverage
+      # De a uno: varios `flutter test` en paralelo compiten por el startup
+      # lock del SDK y fallan de forma intermitente.
+      exec:
+        command: flutter test --coverage
+        concurrency: 1
       packageFilters:
         dirExists: test
     test:changed:
       description: Corre tests solo en paquetes con cambios respecto a main (útil en TBD).
-      exec: flutter test
+      exec:
+        command: flutter test
+        concurrency: 1
       packageFilters:
         dirExists: test
         diff: origin/main

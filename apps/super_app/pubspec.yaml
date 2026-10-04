@@ -30,6 +30,11 @@ dependencies:
     path: ../../packages/features/home
   mini_apps:
     path: ../../packages/features/mini_apps
+  firebase_core: ^4.15.0
+  firebase_analytics: ^12.6.0
+  firebase_crashlytics: ^5.4.0
+  notifications:
+    path: ../../packages/features/notifications
 
 dev_dependencies:
   flutter_test:

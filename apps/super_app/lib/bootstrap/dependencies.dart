@@ -11,11 +11,11 @@ import 'session_refresher.dart';
 GetIt configureDependencies({
   required AppEnvironment environment,
   required List<FeatureModule> modules,
+  Telemetry telemetry = const DebugTelemetry(),
   GetIt? getIt,
 }) {
   final di = getIt ?? GetIt.instance;
 
-  const Telemetry telemetry = DebugTelemetry();
   final tokenStore = SecureTokenStore();
   final sessionEvents = SessionEvents();
   final circuitBreaker = CircuitBreaker();

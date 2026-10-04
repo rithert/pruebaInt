@@ -4,6 +4,15 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// google-services.json NO se versiona (identifica el proyecto Firebase de cada
+// entorno). Sin él la app compila igual y las notificaciones quedan
+// desactivadas: quien clone el repo puede ejecutarlo sin credenciales.
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+} else {
+    logger.warn("google-services.json no encontrado: Firebase deshabilitado en este build.")
+}
+
 android {
     namespace = "com.pruebatecnica.super_app"
     compileSdk = flutter.compileSdkVersion
