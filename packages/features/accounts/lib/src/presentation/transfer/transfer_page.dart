@@ -76,21 +76,33 @@ class _Form extends StatelessWidget {
         const SizedBox(height: AppSpacing.md),
         TextFormField(
           enabled: !submitting,
-          keyboardType: TextInputType.number,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          // Hasta 7 dígitos enteros y 2 decimales, con coma o punto.
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(
+              RegExp(r'^\d{0,7}([.,]\d{0,2})?'),
+            ),
+          ],
           onChanged: cubit.amountChanged,
           decoration: InputDecoration(
-            labelText: 'Monto',
-            prefixText: r'$ ',
+            labelText: 'Monto (USD)',
+            prefixText: r'$',
             errorText: state.fieldErrors[TransferField.amount],
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
         if (state.failure case final failure?) ...[
-          InlineMessage(
-            '${failure.message} Puedes reintentar con seguridad: '
-            'la transferencia no se duplicará.',
-          ),
+          if (state.connectionRestored)
+            const InlineMessage(
+              'Conexión recuperada. Toca Reintentar para completar la '
+              'transferencia; no se duplicará.',
+              tone: InlineMessageTone.info,
+            )
+          else
+            InlineMessage(
+              '${failure.message} Puedes reintentar con seguridad: '
+              'la transferencia no se duplicará.',
+            ),
           const SizedBox(height: AppSpacing.md),
         ],
         FilledButton(
@@ -106,7 +118,7 @@ class _Form extends StatelessWidget {
               : Text(
                   state.status == TransferStatus.failure
                       ? 'Reintentar'
-                      : 'Transferir ${Formatters.money(state.amountPesos * 100)}',
+                      : 'Transferir ${Formatters.money(state.amountMinor)}',
                 ),
         ),
       ],

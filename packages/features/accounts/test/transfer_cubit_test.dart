@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:accounts/accounts.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:core/core.dart';
@@ -6,12 +8,22 @@ import 'package:mocktail/mocktail.dart';
 
 class _MockRepository extends Mock implements AccountsRepository {}
 
+class _StreamConnectivity implements ConnectivityMonitor {
+  _StreamConnectivity(this.onStatusChange);
+
+  @override
+  final Stream<bool> onStatusChange;
+
+  @override
+  Future<bool> get isOnline async => true;
+}
+
 const _main = Account(
   id: 'main',
   type: AccountType.savings,
   name: 'Ahorros',
   maskedNumber: '•••• 1',
-  currency: 'COP',
+  currency: 'USD',
   balanceMinor: 10000000, // $ 100.000
 );
 const _goal = Account(
@@ -19,13 +31,13 @@ const _goal = Account(
   type: AccountType.savings,
   name: 'Metas',
   maskedNumber: '•••• 2',
-  currency: 'COP',
+  currency: 'USD',
   balanceMinor: 0,
 );
 const _receipt = TransferReceipt(
   transferId: 'tr-1',
   amountMinor: 5000000,
-  currency: 'COP',
+  currency: 'USD',
   fromBalanceMinor: 5000000,
   toBalanceMinor: 5000000,
 );
@@ -179,6 +191,36 @@ void main() {
       'Saldo insuficiente.',
     ),
   );
+
+  test('al volver la red tras un fallo, invita a reintentar SIN reintentar '
+      'solo', () async {
+    stubTransfer(const Failure(NoConnectionFailure()));
+    final network = StreamController<bool>();
+    final cubit = TransferCubit(
+      repository: repository,
+      connectivity: _StreamConnectivity(network.stream),
+      newKey: () => 'key-${++keys}',
+    );
+    await cubit.start();
+    cubit.amountChanged('1000');
+    await cubit.submit();
+
+    network.add(true);
+    await Future<void>.delayed(Duration.zero);
+
+    expect(cubit.state.connectionRestored, isTrue);
+    expect(cubit.state.status, TransferStatus.failure);
+    verify(
+      () => repository.transfer(
+        fromAccountId: any(named: 'fromAccountId'),
+        toAccountId: any(named: 'toAccountId'),
+        amountMinor: any(named: 'amountMinor'),
+        idempotencyKey: any(named: 'idempotencyKey'),
+      ),
+    ).called(1);
+    await network.close();
+    await cubit.close();
+  });
 
   blocTest<TransferCubit, TransferState>(
     'no permite la misma cuenta en origen y destino',

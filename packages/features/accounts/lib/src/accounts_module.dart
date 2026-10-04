@@ -63,8 +63,10 @@ class AccountsModule implements FeatureModule {
     GoRoute(
       path: AccountsRoutes.transfer,
       builder: (context, state) => BlocProvider(
-        create: (_) =>
-            TransferCubit(repository: di<AccountsRepository>())..start(),
+        create: (_) => TransferCubit(
+          repository: di<AccountsRepository>(),
+          connectivity: di<ConnectivityMonitor>(),
+        )..start(),
         child: const TransferPage(),
       ),
     ),

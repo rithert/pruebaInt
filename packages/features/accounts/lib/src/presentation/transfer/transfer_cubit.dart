@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:core/core.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -18,10 +20,11 @@ class TransferState extends Equatable {
     this.accounts = const [],
     this.fromId,
     this.toId,
-    this.amountPesos = 0,
+    this.amountMinor = 0,
     this.fieldErrors = const {},
     this.failure,
     this.receipt,
+    this.connectionRestored = false,
   });
 
   /// Identifica ESTE intento de transferencia. Se conserva entre reintentos
@@ -31,10 +34,16 @@ class TransferState extends Equatable {
   final List<Account> accounts;
   final String? fromId;
   final String? toId;
-  final int amountPesos;
+
+  /// Monto en centavos.
+  final int amountMinor;
   final Map<TransferField, String> fieldErrors;
   final AppFailure? failure;
   final TransferReceipt? receipt;
+
+  /// La red volvió después de un fallo: la UI invita a reintentar en lugar
+  /// de seguir mostrando "sin conexión".
+  final bool connectionRestored;
 
   Account? get from => accounts.where((a) => a.id == fromId).firstOrNull;
 
@@ -44,20 +53,22 @@ class TransferState extends Equatable {
     List<Account>? accounts,
     String? fromId,
     String? toId,
-    int? amountPesos,
+    int? amountMinor,
     Map<TransferField, String>? fieldErrors,
     AppFailure? Function()? failure,
     TransferReceipt? receipt,
+    bool? connectionRestored,
   }) => TransferState(
     idempotencyKey: idempotencyKey ?? this.idempotencyKey,
     status: status ?? this.status,
     accounts: accounts ?? this.accounts,
     fromId: fromId ?? this.fromId,
     toId: toId ?? this.toId,
-    amountPesos: amountPesos ?? this.amountPesos,
+    amountMinor: amountMinor ?? this.amountMinor,
     fieldErrors: fieldErrors ?? this.fieldErrors,
     failure: failure != null ? failure() : this.failure,
     receipt: receipt ?? this.receipt,
+    connectionRestored: connectionRestored ?? this.connectionRestored,
   );
 
   @override
@@ -67,10 +78,11 @@ class TransferState extends Equatable {
     accounts,
     fromId,
     toId,
-    amountPesos,
+    amountMinor,
     fieldErrors,
     failure,
     receipt,
+    connectionRestored,
   ];
 }
 
@@ -81,12 +93,33 @@ class TransferState extends Equatable {
 /// reintenta, el BFF reconoce la clave y devuelve el resultado original sin
 /// mover el dinero otra vez.
 class TransferCubit extends Cubit<TransferState> {
-  TransferCubit({required this._repository, String Function()? newKey})
-    : _newKey = newKey ?? const Uuid().v4,
-      super(TransferState(idempotencyKey: (newKey ?? const Uuid().v4)()));
+  TransferCubit({
+    required this._repository,
+    ConnectivityMonitor? connectivity,
+    String Function()? newKey,
+  }) : _newKey = newKey ?? const Uuid().v4,
+       super(TransferState(idempotencyKey: (newKey ?? const Uuid().v4)())) {
+    _connectivitySub = connectivity?.onStatusChange.listen(_onConnectivity);
+  }
 
   final AccountsRepository _repository;
   final String Function() _newKey;
+  StreamSubscription<bool>? _connectivitySub;
+
+  /// NO se reintenta solo: mover dinero exige una acción explícita del
+  /// usuario. Solo se actualiza el mensaje para invitarlo a reintentar.
+  void _onConnectivity(bool online) {
+    final transient = state.failure?.isTransient ?? false;
+    if (online && state.status == TransferStatus.failure && transient) {
+      emit(state.copyWith(connectionRestored: true));
+    }
+  }
+
+  @override
+  Future<void> close() async {
+    await _connectivitySub?.cancel();
+    return super.close();
+  }
 
   /// Carga las cuentas (caché primero) y preselecciona origen y destino.
   Future<void> start() async {
@@ -118,9 +151,9 @@ class TransferCubit extends Cubit<TransferState> {
 
   void toSelected(String id) => _edit(state.copyWith(toId: id));
 
-  /// Monto en pesos enteros (el campo solo admite dígitos).
-  void amountChanged(String digits) =>
-      _edit(state.copyWith(amountPesos: int.tryParse(digits) ?? 0));
+  /// Monto en dólares tal como lo escribe el usuario (`12`, `12,50`).
+  void amountChanged(String text) =>
+      _edit(state.copyWith(amountMinor: Formatters.parseAmount(text) ?? 0));
 
   /// Cualquier cambio de datos es un intento NUEVO: nueva clave.
   void _edit(TransferState next) => emit(
@@ -129,6 +162,7 @@ class TransferCubit extends Cubit<TransferState> {
       status: TransferStatus.editing,
       fieldErrors: const {},
       failure: () => null,
+      connectionRestored: false,
     ),
   );
 
@@ -142,12 +176,16 @@ class TransferCubit extends Cubit<TransferState> {
     }
 
     emit(
-      state.copyWith(status: TransferStatus.submitting, failure: () => null),
+      state.copyWith(
+        status: TransferStatus.submitting,
+        failure: () => null,
+        connectionRestored: false,
+      ),
     );
     final result = await _repository.transfer(
       fromAccountId: state.fromId!,
       toAccountId: state.toId!,
-      amountMinor: state.amountPesos * 100,
+      amountMinor: state.amountMinor,
       idempotencyKey: state.idempotencyKey,
     );
 
@@ -180,9 +218,9 @@ class TransferCubit extends Cubit<TransferState> {
       if (state.toId == null) TransferField.to: 'Elige la cuenta de destino.',
       if (state.toId != null && state.toId == state.fromId)
         TransferField.to: 'Debe ser distinta a la de origen.',
-      if (state.amountPesos <= 0)
+      if (state.amountMinor <= 0)
         TransferField.amount: 'Ingresa un monto mayor a cero.'
-      else if (from != null && state.amountPesos * 100 > from.balanceMinor)
+      else if (from != null && state.amountMinor > from.balanceMinor)
         TransferField.amount:
             'Supera tu saldo disponible (${Formatters.money(from.balanceMinor)}).',
     };
