@@ -11,6 +11,7 @@ workspace:
   - apps/super_app
   - packages/core
   - packages/design_system
+  - packages/features/auth
 
 dev_dependencies:
   flutter_lints: ^6.0.0
