@@ -69,6 +69,17 @@ const MIGRATIONS: readonly string[] = [
     UNIQUE (user_id, idempotency_key)
   );
   `,
+  // v2: eventos de uso para personalizar la experiencia.
+  `
+  CREATE TABLE user_events (
+    id           TEXT PRIMARY KEY,
+    user_id      TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    type         TEXT NOT NULL,
+    component_id TEXT NOT NULL,
+    created_at   TEXT NOT NULL
+  );
+  CREATE INDEX idx_user_events_user ON user_events(user_id, created_at);
+  `,
 ];
 
 export function openDatabase(path: string): Db {

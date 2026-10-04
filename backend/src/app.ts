@@ -5,6 +5,7 @@ import { ChaosController, chaosAdminRoutes, registerChaos } from './chaos/chaos.
 import type { Deps } from './container.js';
 import { accountsRoutes } from './modules/accounts/accounts.routes.js';
 import { activityAdminRoutes } from './modules/activity/activity.routes.js';
+import { experienceRoutes, flagsAdminRoutes } from './modules/experience/experience.routes.js';
 import { authGuard } from './modules/auth/auth.guard.js';
 import { authRoutes, meRoutes } from './modules/auth/auth.routes.js';
 import { transfersRoutes } from './modules/transfers/transfers.routes.js';
@@ -71,12 +72,14 @@ export async function buildApp(deps: Deps, options: AppOptions = {}): Promise<Fa
       await scope.register(meRoutes, { deps });
       await scope.register(accountsRoutes, { deps });
       await scope.register(transfersRoutes, { deps });
+      await scope.register(experienceRoutes, { deps });
     },
     { prefix: '/v1' },
   );
 
   // Operación (protegida por ADMIN_KEY).
   await app.register(activityAdminRoutes, { deps });
+  await app.register(flagsAdminRoutes, { deps });
 
   return app;
 }

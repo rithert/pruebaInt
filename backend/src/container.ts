@@ -6,6 +6,7 @@ import { PortfolioGenerator } from './modules/activity/portfolio-generator.js';
 import { AuthRepository } from './modules/auth/auth.repository.js';
 import { AuthService } from './modules/auth/auth.service.js';
 import { TokenService } from './modules/auth/tokens.js';
+import { FlagStore } from './modules/experience/flags.js';
 import { TransfersService } from './modules/transfers/transfers.service.js';
 import { DomainEvents } from './shared/events.js';
 import type { Random } from './shared/random.js';
@@ -25,6 +26,7 @@ export interface Deps {
   authService: AuthService;
   transfersService: TransfersService;
   activityEngine: ActivityEngine;
+  flags: FlagStore;
 }
 
 export interface DepsOverrides {
@@ -62,5 +64,6 @@ export function createDeps(config: AppConfig, overrides: DepsOverrides = {}): De
     }),
     transfersService: new TransfersService({ db, accounts: accountsRepository, events, now }),
     activityEngine: new ActivityEngine({ db, accounts: accountsRepository, events, now, random }),
+    flags: new FlagStore(),
   };
 }
