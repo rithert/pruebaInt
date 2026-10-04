@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:ui';
 
+import 'package:auth/auth.dart';
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
@@ -9,7 +11,7 @@ import 'router/app_router.dart';
 
 /// Módulos de dominio que componen la app. Agregar un dominio nuevo es
 /// agregarlo a esta lista (y en el futuro, habilitarlo por feature flag).
-final List<FeatureModule> _modules = [];
+final List<FeatureModule> _modules = [AuthModule()];
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,9 +32,13 @@ void main() {
     return true;
   };
 
+  final session = di<SessionCubit>();
+  unawaited(session.restore());
+
   runApp(
     SuperApp(
       router: createRouter(di: di, modules: _modules),
+      session: session,
     ),
   );
 }
