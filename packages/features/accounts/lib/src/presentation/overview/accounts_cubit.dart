@@ -29,24 +29,21 @@ class AccountsCubit extends Cubit<Resource<AccountsOverview>> {
   Future<void> refresh() async {
     await _overviewSub?.cancel();
     final done = Completer<void>();
-    _overviewSub = _repository.watchOverview().listen(
-      (resource) {
-        // Mientras se actualiza, se conserva lo que ya se mostraba si la
-        // caché está vacía (evita parpadear a skeleton en un reintento).
-        if (resource.isRefreshing && !resource.hasData && state.hasData) {
-          emit(
-            Resource(
-              data: state.data,
-              updatedAt: state.updatedAt,
-              isRefreshing: true,
-            ),
-          );
-        } else {
-          emit(resource);
-        }
-      },
-      onDone: done.complete,
-    );
+    _overviewSub = _repository.watchOverview().listen((resource) {
+      // Mientras se actualiza, se conserva lo que ya se mostraba si la
+      // caché está vacía (evita parpadear a skeleton en un reintento).
+      if (resource.isRefreshing && !resource.hasData && state.hasData) {
+        emit(
+          Resource(
+            data: state.data,
+            updatedAt: state.updatedAt,
+            isRefreshing: true,
+          ),
+        );
+      } else {
+        emit(resource);
+      }
+    }, onDone: done.complete);
     return done.future;
   }
 

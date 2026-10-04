@@ -33,9 +33,9 @@ class TransactionsPage extends StatelessWidget {
             next.status == TransactionsStatus.success &&
             next.failure != null &&
             prev.failure != next.failure,
-        listener: (context, state) => ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(state.failure!.message))),
+        listener: (context, state) =>
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text(state.failure!.message))),
         builder: (context, state) => RefreshIndicator(
           onRefresh: cubit.refresh,
           child: NotificationListener<ScrollNotification>(
@@ -138,9 +138,8 @@ class TransactionsPage extends StatelessWidget {
               itemCount: items.length,
               itemBuilder: (context, index) => TransactionTile(
                 transaction: items[index],
-                onTap: () => context.push(
-                  AccountsRoutes.transaction(items[index].id),
-                ),
+                onTap: () =>
+                    context.push(AccountsRoutes.transaction(items[index].id)),
               ),
             ),
           ],

@@ -141,7 +141,9 @@ class TransferCubit extends Cubit<TransferState> {
       return;
     }
 
-    emit(state.copyWith(status: TransferStatus.submitting, failure: () => null));
+    emit(
+      state.copyWith(status: TransferStatus.submitting, failure: () => null),
+    );
     final result = await _repository.transfer(
       fromAccountId: state.fromId!,
       toAccountId: state.toId!,
@@ -173,7 +175,8 @@ class TransferCubit extends Cubit<TransferState> {
   Map<TransferField, String> _validate() {
     final from = state.from;
     return {
-      if (state.fromId == null) TransferField.from: 'Elige la cuenta de origen.',
+      if (state.fromId == null)
+        TransferField.from: 'Elige la cuenta de origen.',
       if (state.toId == null) TransferField.to: 'Elige la cuenta de destino.',
       if (state.toId != null && state.toId == state.fromId)
         TransferField.to: 'Debe ser distinta a la de origen.',

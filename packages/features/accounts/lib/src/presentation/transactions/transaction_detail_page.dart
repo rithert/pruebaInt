@@ -76,9 +76,8 @@ class _Detail extends StatelessWidget {
         const SizedBox(height: AppSpacing.sm),
         Text(
           Formatters.signedMoney(tx.amountMinor),
-          style: Theme.of(context).textTheme.displaySmall?.copyWith(
-            color: tx.isCredit ? AppColors.credit : null,
-          ),
+          style: Theme.of(context).textTheme.displaySmall
+              ?.copyWith(color: tx.isCredit ? AppColors.credit : null),
         ),
         const Divider(height: AppSpacing.xl),
         _Row('Descripción', tx.description),

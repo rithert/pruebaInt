@@ -31,7 +31,10 @@ void main() {
 
     test('relative describe la antigüedad de los datos', () {
       expect(
-        Formatters.relative(now.subtract(const Duration(seconds: 20)), now: now),
+        Formatters.relative(
+          now.subtract(const Duration(seconds: 20)),
+          now: now,
+        ),
         'hace un momento',
       );
       expect(

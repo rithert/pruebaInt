@@ -71,22 +71,25 @@ void main() {
     expect(query, {'limit': 20, 'cursor': 'c2', 'category': 'income'});
   });
 
-  test('sin red, la primera página se sirve desde caché con cachedAt', () async {
-    adapter
-      ..enqueueJson(200, {
-        'items': [_txJson('t1')],
-        'nextCursor': 'c2',
-      })
-      ..enqueueTransportError(DioExceptionType.connectionError);
+  test(
+    'sin red, la primera página se sirve desde caché con cachedAt',
+    () async {
+      adapter
+        ..enqueueJson(200, {
+          'items': [_txJson('t1')],
+          'nextCursor': 'c2',
+        })
+        ..enqueueTransportError(DioExceptionType.connectionError);
 
-    await repository.transactions('acc-1');
-    final offline = await repository.transactions('acc-1');
+      await repository.transactions('acc-1');
+      final offline = await repository.transactions('acc-1');
 
-    final page = offline.valueOrNull!;
-    expect(page.items.single.title, 'Mercado Fresco');
-    expect(page.cachedAt, isNotNull);
-    expect(page.nextCursor, isNull, reason: 'sin red no se puede paginar');
-  });
+      final page = offline.valueOrNull!;
+      expect(page.items.single.title, 'Mercado Fresco');
+      expect(page.cachedAt, isNotNull);
+      expect(page.nextCursor, isNull, reason: 'sin red no se puede paginar');
+    },
+  );
 
   test('sin red y sin caché, la falla se propaga', () async {
     adapter.enqueueTransportError(DioExceptionType.connectionError);
