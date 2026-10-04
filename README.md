@@ -19,7 +19,9 @@ packages/sdui/           Motor de Server-Driven UI (parser, catálogo, render ai
 packages/features/auth/  Onboarding, login, sesión y desbloqueo biométrico
 packages/features/accounts/  Saldos, movimientos y transferencias entre cuentas propias
 packages/features/home/  Home personalizado dirigido por el servidor y eventos de uso
+packages/features/mini_apps/  Anfitrión de mini apps de terceros (WebView + bridge)
 backend/                 BFF (Fastify + TypeScript + SQLite)
+mini_apps/               Mini apps web de terceros (hosting independiente, puerto 3100)
 docs/                    Arquitectura, ADRs, operación, uso de IA
 ```
 
@@ -50,8 +52,13 @@ cd backend
 npm install
 npm run dev          # http://localhost:3000/health
 
-# 3. App (en otra terminal, con el teléfono conectado por USB o el emulador abierto)
-adb reverse tcp:3000 tcp:3000   # el localhost:3000 del dispositivo apunta al PC
+# 3. Mini apps (otra terminal)
+cd mini_apps
+npm start            # http://localhost:3100/credit-simulator/
+
+# 4. App (otra terminal, con el teléfono conectado por USB o el emulador abierto)
+adb reverse tcp:3000 tcp:3000   # BFF
+adb reverse tcp:3100 tcp:3100   # mini apps
 cd apps/super_app
 fvm flutter run                 # usa http://localhost:3000 por defecto
 ```
@@ -60,7 +67,7 @@ fvm flutter run                 # usa http://localhost:3000 por defecto
 
 ### Desde VS Code (recomendado)
 
-En *Run and Debug* (`Ctrl+Shift+D`), elige **"BFF + App"** y presiona **F5**: levanta el BFF en modo watch, ejecuta `adb reverse` y lanza la app en el dispositivo conectado. También hay lanzadores individuales: *App (dev)*, *App (profile)* y *BFF*.
+En *Run and Debug* (`Ctrl+Shift+D`), elige **"Todo (BFF + mini apps + App)"** y presiona **F5**: levanta el BFF en modo watch y el servidor de mini apps, ejecuta `adb reverse` (3000 y 3100) y lanza la app en el dispositivo conectado. También hay lanzadores individuales.
 
 Para apuntar la app a otro backend: `fvm flutter run --dart-define=API_BASE_URL=https://mi-bff.example.com`.
 
@@ -89,6 +96,9 @@ Todas las respuestas de error usan el formato `{ error: { code, message, correla
 | POST | `/v1/transfers` | Bearer + `Idempotency-Key` | Transferencia entre cuentas propias |
 | GET | `/v1/experience/home` | Bearer | Layout SDUI personalizado (reglas + datos reales + comportamiento) |
 | POST | `/v1/events` | Bearer | Eventos de uso por lotes (`tapped`, `dismissed`) |
+| POST | `/v1/mini-apps/:appId/token` | Bearer | Token delegado (5 min, alcance mínimo) para una mini app |
+| POST | `/v1/credit/applications` | Bearer | Solicitud de crédito (la crea la app tras confirmación nativa) |
+| POST | `/v1/mini-api/credit/quote` | Token delegado | Cotización para la mini app (sistema francés) |
 | POST | `/admin/activity/tick` | `x-admin-key` | Fuerza un movimiento (demo de push) |
 | GET/PUT | `/admin/flags` | `x-admin-key` | Kill switches de la experiencia (insights, promociones, mini apps) |
 | GET/PUT/DELETE | `/admin/chaos` | `x-admin-key` | Inyección de latencia, errores y caídas por servicio |

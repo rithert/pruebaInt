@@ -2,15 +2,14 @@
   "version": "2.0.0",
   "tasks": [
     {
-      // El localhost:3000 del dispositivo (físico o emulador) apunta al BFF
-      // del PC a través de USB. Se pierde al desconectar el cable.
-      "label": "adb reverse 3000",
+      // El localhost del dispositivo (físico o emulador) apunta al PC por USB:
+      // 3000 = BFF, 3100 = mini apps. Se pierde al desconectar el cable.
+      "label": "adb reverse",
       "type": "shell",
-      "command": "adb",
+      "command": "adb reverse tcp:3000 tcp:3000; adb reverse tcp:3100 tcp:3100",
       "windows": {
-        "command": "${env:LOCALAPPDATA}\\Android\\Sdk\\platform-tools\\adb.exe"
+        "command": "& \"${env:LOCALAPPDATA}\\Android\\Sdk\\platform-tools\\adb.exe\" reverse tcp:3000 tcp:3000; & \"${env:LOCALAPPDATA}\\Android\\Sdk\\platform-tools\\adb.exe\" reverse tcp:3100 tcp:3100"
       },
-      "args": ["reverse", "tcp:3000", "tcp:3000"],
       "presentation": { "reveal": "silent" },
       "problemMatcher": []
     }

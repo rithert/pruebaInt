@@ -1,5 +1,5 @@
 {
-  // Lanzadores del proyecto. Para la demo: "BFF + App" levanta todo con F5.
+  // Lanzadores del proyecto. Para la demo: "Todo (BFF + mini apps + App)".
   "version": "0.2.0",
   "configurations": [
     {
@@ -8,8 +8,8 @@
       "request": "launch",
       "cwd": "apps/super_app",
       "program": "lib/main.dart",
-      // Redirige el puerto 3000 del teléfono al PC antes de lanzar la app.
-      "preLaunchTask": "adb reverse 3000",
+      // Redirige los puertos 3000 y 3100 del teléfono al PC antes de lanzar.
+      "preLaunchTask": "adb reverse",
       "toolArgs": ["--dart-define=ENV=dev"]
     },
     {
@@ -19,7 +19,7 @@
       "cwd": "apps/super_app",
       "program": "lib/main.dart",
       "flutterMode": "profile",
-      "preLaunchTask": "adb reverse 3000",
+      "preLaunchTask": "adb reverse",
       "toolArgs": ["--dart-define=ENV=dev"]
     },
     {
@@ -31,12 +31,24 @@
       "runtimeArgs": ["run", "dev"],
       "console": "integratedTerminal",
       "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Mini apps (web · puerto 3100)",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/mini_apps",
+      "program": "${workspaceFolder}/mini_apps/server.mjs",
+      "console": "integratedTerminal"
     }
   ],
   "compounds": [
     {
-      "name": "BFF + App",
-      "configurations": ["BFF (Node · watch)", "App (dev · teléfono USB)"],
+      "name": "Todo (BFF + mini apps + App)",
+      "configurations": [
+        "BFF (Node · watch)",
+        "Mini apps (web · puerto 3100)",
+        "App (dev · teléfono USB)"
+      ],
       "stopAll": true
     }
   ]
