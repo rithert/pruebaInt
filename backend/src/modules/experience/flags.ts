@@ -12,7 +12,7 @@ export interface ExperienceFlags {
 export const DEFAULT_FLAGS: ExperienceFlags = {
   insights: true,
   promotions: true,
-  miniApps: false,
+  miniApps: true,
 };
 
 export class FlagStore {

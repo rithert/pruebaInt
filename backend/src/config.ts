@@ -14,6 +14,8 @@ export interface AppConfig {
   adminKey: string;
   /** Registra el chaos testing. Por defecto: activo salvo en producción. */
   chaosEnabled: boolean;
+  /** Orígenes web de mini apps autorizados por CORS. */
+  miniAppOrigins: string[];
 }
 
 const DEV_JWT_SECRET = 'dev-only-secret-change-me-0123456789abcdef';
@@ -43,6 +45,10 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     activityIntervalMs: Number(env.ACTIVITY_INTERVAL_MS ?? 60_000),
     adminKey,
     chaosEnabled: env.CHAOS_ENABLED ? env.CHAOS_ENABLED === 'true' : !isProd,
+    miniAppOrigins: (env.MINI_APP_ORIGINS ?? 'http://localhost:3100')
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean),
   };
 }
 

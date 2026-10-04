@@ -1,3 +1,4 @@
+import cors from '@fastify/cors';
 import rateLimit from '@fastify/rate-limit';
 import Fastify, { type FastifyInstance } from 'fastify';
 
@@ -7,6 +8,7 @@ import { accountsRoutes } from './modules/accounts/accounts.routes.js';
 import { activityAdminRoutes } from './modules/activity/activity.routes.js';
 import { experienceRoutes, flagsAdminRoutes } from './modules/experience/experience.routes.js';
 import { authGuard } from './modules/auth/auth.guard.js';
+import { miniAppsHostRoutes, miniAppsPublicRoutes } from './modules/mini-apps/mini-apps.routes.js';
 import { authRoutes, meRoutes } from './modules/auth/auth.routes.js';
 import { transfersRoutes } from './modules/transfers/transfers.routes.js';
 import { registerErrorHandler } from './shared/errors.js';
@@ -32,6 +34,14 @@ export async function buildApp(deps: Deps, options: AppOptions = {}): Promise<Fa
   app.decorateRequest('userId', '');
   registerErrorHandler(app);
   await app.register(rateLimit, { global: false });
+  // Las mini apps corren en otro origen (WebView): solo los orígenes
+  // registrados pueden llamar al BFF desde un navegador.
+  await app.register(cors, {
+    origin: deps.config.miniAppOrigins,
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['authorization', 'content-type', 'x-correlation-id'],
+    exposedHeaders: ['x-correlation-id'],
+  });
 
   app.addHook('onSend', async (request, reply) => {
     reply.header('x-correlation-id', request.id);
@@ -73,9 +83,13 @@ export async function buildApp(deps: Deps, options: AppOptions = {}): Promise<Fa
       await scope.register(accountsRoutes, { deps });
       await scope.register(transfersRoutes, { deps });
       await scope.register(experienceRoutes, { deps });
+      await scope.register(miniAppsHostRoutes, { deps });
     },
     { prefix: '/v1' },
   );
+
+  // API para mini apps: token delegado de alcance limitado, nunca la sesión.
+  await app.register(miniAppsPublicRoutes, { deps, prefix: '/v1/mini-api' });
 
   // Operación (protegida por ADMIN_KEY).
   await app.register(activityAdminRoutes, { deps });

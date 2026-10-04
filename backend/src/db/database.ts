@@ -80,6 +80,19 @@ const MIGRATIONS: readonly string[] = [
   );
   CREATE INDEX idx_user_events_user ON user_events(user_id, created_at);
   `,
+  // v3: solicitudes de crédito creadas desde la mini app (vía la app nativa).
+  `
+  CREATE TABLE credit_applications (
+    id                    TEXT PRIMARY KEY,
+    user_id               TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    amount_minor          INTEGER NOT NULL,
+    term_months           INTEGER NOT NULL,
+    annual_rate           REAL NOT NULL,
+    monthly_payment_minor INTEGER NOT NULL,
+    status                TEXT NOT NULL,
+    created_at            TEXT NOT NULL
+  );
+  `,
 ];
 
 export function openDatabase(path: string): Db {

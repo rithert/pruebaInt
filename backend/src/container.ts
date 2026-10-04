@@ -7,6 +7,7 @@ import { AuthRepository } from './modules/auth/auth.repository.js';
 import { AuthService } from './modules/auth/auth.service.js';
 import { TokenService } from './modules/auth/tokens.js';
 import { FlagStore } from './modules/experience/flags.js';
+import { DelegatedTokenService } from './modules/mini-apps/delegated-tokens.js';
 import { TransfersService } from './modules/transfers/transfers.service.js';
 import { DomainEvents } from './shared/events.js';
 import type { Random } from './shared/random.js';
@@ -27,6 +28,7 @@ export interface Deps {
   transfersService: TransfersService;
   activityEngine: ActivityEngine;
   flags: FlagStore;
+  delegatedTokens: DelegatedTokenService;
 }
 
 export interface DepsOverrides {
@@ -65,5 +67,6 @@ export function createDeps(config: AppConfig, overrides: DepsOverrides = {}): De
     transfersService: new TransfersService({ db, accounts: accountsRepository, events, now }),
     activityEngine: new ActivityEngine({ db, accounts: accountsRepository, events, now, random }),
     flags: new FlagStore(),
+    delegatedTokens: new DelegatedTokenService(config.jwtSecret, now),
   };
 }

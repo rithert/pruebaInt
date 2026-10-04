@@ -110,7 +110,12 @@ describe('buildHomeLayout (motor de reglas)', () => {
     );
 
     const actions = byId(layout, 'quick_actions')?.props?.actions as { id: string }[];
-    expect(actions.map((a) => a.id)).toEqual(['support', 'movements', 'transfer']);
+    expect(actions.map((a) => a.id)).toEqual([
+      'support',
+      'movements',
+      'transfer',
+      'credit_simulator',
+    ]);
   });
 
   it('FLAGS: apagar promociones e insights los quita sin publicar la app', () => {
@@ -124,7 +129,7 @@ describe('buildHomeLayout (motor de reglas)', () => {
   });
 
   it('FLAGS: la mini app aparece en acciones solo si está habilitada', () => {
-    const off = buildHomeLayout(baseSignals, DEFAULT_FLAGS);
+    const off = buildHomeLayout(baseSignals, { ...DEFAULT_FLAGS, miniApps: false });
     const on = buildHomeLayout(baseSignals, { ...DEFAULT_FLAGS, miniApps: true });
     const actionIds = (layout: SduiComponent[]) =>
       (byId(layout, 'quick_actions')?.props?.actions as { id: string }[]).map((a) => a.id);
