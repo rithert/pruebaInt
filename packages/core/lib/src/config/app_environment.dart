@@ -9,6 +9,7 @@ class AppEnvironment {
     required this.apiBaseUrl,
     required this.enableDebugTools,
     this.miniAppsBaseUrl = 'http://localhost:3100',
+    this.adminKey = '',
   });
 
   /// Lee los valores definidos al compilar. Por defecto apunta a los
@@ -28,6 +29,10 @@ class AppEnvironment {
       'MINI_APPS_BASE_URL',
       defaultValue: 'http://localhost:3100',
     ),
+    adminKey: String.fromEnvironment(
+      'ADMIN_KEY',
+      defaultValue: 'dev-admin-key',
+    ),
   );
 
   final String name;
@@ -38,6 +43,12 @@ class AppEnvironment {
 
   /// Hosting de las mini apps (otro origen, desplegado de forma independiente).
   final String miniAppsBaseUrl;
+
+  /// Clave de las rutas /admin del BFF, SOLO para el panel de desarrollo
+  /// (chaos, flags). Un build de producción se compila sin ella y con
+  /// `ENABLE_DEBUG_TOOLS=false`; además el BFF de producción no registra el
+  /// chaos.
+  final String adminKey;
 
   bool get isProduction => name == 'prod';
 }

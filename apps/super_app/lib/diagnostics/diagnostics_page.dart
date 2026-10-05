@@ -8,9 +8,12 @@ import 'diagnostics_cubit.dart';
 /// Pantalla técnica para la demo y soporte: verifica la cadena completa
 /// app → interceptores → BFF y muestra el estado de resiliencia.
 class DiagnosticsPage extends StatelessWidget {
-  const DiagnosticsPage({required this.environment, super.key});
+  const DiagnosticsPage({required this.environment, this.devTools, super.key});
 
   final AppEnvironment environment;
+
+  /// Panel de demo (chaos, flags, push); solo en builds de desarrollo.
+  final Widget? devTools;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +40,7 @@ class DiagnosticsPage extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.md),
             _HealthResult(state: state),
+            if (devTools != null) ...[const Divider(height: 32), devTools!],
           ],
         ),
       ),

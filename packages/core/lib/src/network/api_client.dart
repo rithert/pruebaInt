@@ -25,12 +25,13 @@ class ApiClient {
     String path, {
     required JsonDecoder<T> decode,
     Map<String, Object?>? query,
+    Map<String, String>? headers,
     Map<String, Object?>? extra,
   }) => _send(
     () => _dio.get<Object?>(
       path,
       queryParameters: query,
-      options: Options(extra: extra),
+      options: Options(headers: headers, extra: extra),
     ),
     decode,
   );
@@ -50,12 +51,31 @@ class ApiClient {
     decode,
   );
 
+  Future<Result<T>> put<T>(
+    String path, {
+    required JsonDecoder<T> decode,
+    Object? body,
+    Map<String, String>? headers,
+    Map<String, Object?>? extra,
+  }) => _send(
+    () => _dio.put<Object?>(
+      path,
+      data: body,
+      options: Options(headers: headers, extra: extra),
+    ),
+    decode,
+  );
+
   Future<Result<T>> delete<T>(
     String path, {
     required JsonDecoder<T> decode,
+    Map<String, String>? headers,
     Map<String, Object?>? extra,
   }) => _send(
-    () => _dio.delete<Object?>(path, options: Options(extra: extra)),
+    () => _dio.delete<Object?>(
+      path,
+      options: Options(headers: headers, extra: extra),
+    ),
     decode,
   );
 

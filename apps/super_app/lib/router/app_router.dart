@@ -7,6 +7,8 @@ import 'package:go_router/go_router.dart';
 import 'package:home/home.dart';
 import 'package:sdui/sdui.dart';
 
+import '../diagnostics/dev_tools_cubit.dart';
+import '../diagnostics/dev_tools_section.dart';
 import '../diagnostics/diagnostics_cubit.dart';
 import '../diagnostics/diagnostics_page.dart';
 import 'app_routes.dart';
@@ -64,14 +66,33 @@ GoRouter createRouter({
       ),
       GoRoute(
         path: AppRoutes.diagnostics,
-        builder: (context, state) => BlocProvider(
-          create: (_) => DiagnosticsCubit(
-            api: di<ApiClient>(),
-            connectivity: di<ConnectivityMonitor>(),
-            circuitBreaker: di<CircuitBreaker>(),
-          )..start(),
-          child: DiagnosticsPage(environment: di<AppEnvironment>()),
-        ),
+        builder: (context, state) {
+          final environment = di<AppEnvironment>();
+          final devTools = environment.enableDebugTools;
+          return MultiBlocProvider(
+            providers: [
+              BlocProvider(
+                create: (_) => DiagnosticsCubit(
+                  api: di<ApiClient>(),
+                  connectivity: di<ConnectivityMonitor>(),
+                  circuitBreaker: di<CircuitBreaker>(),
+                )..start(),
+              ),
+              if (devTools)
+                BlocProvider(
+                  create: (_) => DevToolsCubit(
+                    api: di<ApiClient>(),
+                    adminKey: environment.adminKey,
+                    customerEmail: () => session.state.user?.email,
+                  )..load(),
+                ),
+            ],
+            child: DiagnosticsPage(
+              environment: environment,
+              devTools: devTools ? const DevToolsSection() : null,
+            ),
+          );
+        },
       ),
     ],
   );
