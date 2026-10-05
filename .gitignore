@@ -41,3 +41,6 @@ Thumbs.db
 
 # FVM Version Cache
 .fvm/
+
+*.db-shm
+*.db-wal
