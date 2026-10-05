@@ -8,7 +8,11 @@
       "type": "shell",
       "command": "adb reverse tcp:3000 tcp:3000; adb reverse tcp:3100 tcp:3100",
       "windows": {
-        "command": "& \"${env:LOCALAPPDATA}\\Android\\Sdk\\platform-tools\\adb.exe\" reverse tcp:3000 tcp:3000; & \"${env:LOCALAPPDATA}\\Android\\Sdk\\platform-tools\\adb.exe\" reverse tcp:3100 tcp:3100"
+        "command": "& \"${env:LOCALAPPDATA}\\Android\\Sdk\\platform-tools\\adb.exe\" reverse tcp:3000 tcp:3000; & \"${env:LOCALAPPDATA}\\Android\\Sdk\\platform-tools\\adb.exe\" reverse tcp:3100 tcp:3100",
+        // Sintaxis PowerShell: no depender de la terminal por defecto (cmd la rompe).
+        "options": {
+          "shell": { "executable": "powershell.exe", "args": ["-NoProfile", "-Command"] }
+        }
       },
       "presentation": { "reveal": "silent" },
       "problemMatcher": []
