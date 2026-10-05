@@ -65,9 +65,12 @@ export function registerErrorHandler(app: FastifyInstance): void {
       });
     }
 
+    // 4xx del framework (JSON mal formado, cuerpo demasiado grande...): su
+    // mensaje es técnico y en inglés; el detalle queda en el log.
     if (statusCode < 500) {
+      request.log.warn({ err: error }, 'solicitud rechazada por el framework');
       return reply.status(statusCode).send({
-        error: { code: 'bad_request', message: (error as Error).message, correlationId },
+        error: { code: 'bad_request', message: 'La solicitud no es válida.', correlationId },
       });
     }
 

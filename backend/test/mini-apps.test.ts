@@ -48,6 +48,31 @@ describe('Mini apps', () => {
     expect(body.token).toBeTruthy();
   });
 
+  it('emite el token aunque el POST llegue sin cuerpo y con content-type JSON (como Dio)', async () => {
+    const response = await ctx.app.inject({
+      method: 'POST',
+      url: '/v1/mini-apps/credit-simulator/token',
+      headers: { ...bearer(session), 'content-type': 'application/json' },
+    });
+
+    expect(response.statusCode).toBe(200);
+  });
+
+  it('un JSON mal formado responde 400 sin filtrar el mensaje del framework', async () => {
+    const response = await ctx.app.inject({
+      method: 'POST',
+      url: '/v1/credit/applications',
+      headers: { ...bearer(session), 'content-type': 'application/json' },
+      payload: '{"amountMinor":',
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json().error).toMatchObject({
+      code: 'bad_request',
+      message: 'La solicitud no es válida.',
+    });
+  });
+
   it('la mini app cotiza con su token y la tasa depende del perfil', async () => {
     const { token } = await delegatedToken();
     const response = await quote(token);

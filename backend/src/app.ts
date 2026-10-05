@@ -34,6 +34,15 @@ export async function buildApp(deps: Deps, options: AppOptions = {}): Promise<Fa
 
   app.decorateRequest('userId', '');
   registerErrorHandler(app);
+
+  // Un POST sin cuerpo con `content-type: application/json` (Dio lo envía
+  // siempre) es válido: Fastify lo rechaza por defecto con un 400.
+  const parseJson = app.getDefaultJsonParser('error', 'error');
+  app.removeContentTypeParser('application/json');
+  app.addContentTypeParser('application/json', { parseAs: 'string' }, (request, body, done) => {
+    if (body === '') return done(null, undefined);
+    parseJson(request, body as string, done);
+  });
   await app.register(rateLimit, { global: false });
   // Las mini apps corren en otro origen (WebView): solo los orígenes
   // registrados pueden llamar al BFF desde un navegador.
