@@ -6,7 +6,6 @@ import '../../domain/accounts_repository.dart';
 import '../../domain/formatters.dart';
 import '../../domain/models.dart';
 import '../category_style.dart';
-import '../widgets/skeleton.dart';
 
 /// Detalle de un movimiento. Es el destino de los deep links de las
 /// notificaciones push (`/transactions/:id`).

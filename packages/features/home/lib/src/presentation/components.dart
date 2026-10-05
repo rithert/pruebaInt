@@ -41,7 +41,12 @@ class _Greeting extends StatelessWidget {
         ),
         if (subtitle != null) ...[
           const SizedBox(height: AppSpacing.xs),
-          Text(subtitle),
+          Text(
+            subtitle,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
         ],
       ],
     );
@@ -159,35 +164,50 @@ class _QuickActions extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
 
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         for (final item in items)
           Expanded(
-            child: InkWell(
-              borderRadius: BorderRadius.circular(AppSpacing.radius),
-              onTap: () {
-                actions
-                  ..track('tapped', 'quick_actions.${item.string('id')}')
-                  ..navigate(item.string('route'));
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-                child: Column(
-                  children: [
-                    CircleAvatar(
-                      radius: 24,
-                      backgroundColor: scheme.primaryContainer,
-                      child: Icon(
-                        _icons[item.string('icon')] ?? Icons.apps,
-                        color: scheme.onPrimaryContainer,
+            child: Semantics(
+              button: true,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(AppSpacing.radius),
+                onTap: () {
+                  actions
+                    ..track('tapped', 'quick_actions.${item.string('id')}')
+                    ..navigate(item.string('route'));
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: AppSpacing.sm,
+                    horizontal: AppSpacing.xs,
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          color: scheme.secondaryContainer,
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radius + AppSpacing.xs,
+                          ),
+                        ),
+                        child: Icon(
+                          _icons[item.string('icon')] ?? Icons.apps,
+                          color: scheme.onSecondaryContainer,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      item.string('label'),
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.labelMedium,
-                    ),
-                  ],
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        item.string('label'),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.labelMedium,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

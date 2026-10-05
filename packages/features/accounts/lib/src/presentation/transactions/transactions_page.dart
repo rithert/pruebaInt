@@ -7,15 +7,14 @@ import '../../accounts_routes.dart';
 import '../../domain/formatters.dart';
 import '../../domain/models.dart';
 import '../category_style.dart';
-import '../widgets/skeleton.dart';
+import '../privacy/balance_visibility_cubit.dart';
 import '../widgets/stale_data_banner.dart';
 import '../widgets/transaction_tile.dart';
 import 'transactions_cubit.dart';
 import 'transactions_state.dart';
 
-/// Movimientos de una cuenta: scroll infinito agrupado por día, filtro por
-/// categoría y pull-to-refresh. [account] llega al navegar desde el home;
-/// con un deep link puede ser `null`.
+/// Movimientos de una cuenta como pantalla propia. [account] llega al navegar
+/// desde el home; con un deep link puede ser `null`.
 class TransactionsPage extends StatelessWidget {
   const TransactionsPage({this.account, super.key});
 
@@ -23,51 +22,65 @@ class TransactionsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cubit = context.read<TransactionsCubit>();
-
     return Scaffold(
       appBar: AppBar(title: Text(account?.name ?? 'Movimientos')),
-      body: BlocConsumer<TransactionsCubit, TransactionsState>(
-        // Un refresh fallido no tapa la lista: se avisa con un SnackBar.
-        listenWhen: (prev, next) =>
-            next.status == TransactionsStatus.success &&
-            next.failure != null &&
-            prev.failure != next.failure,
-        listener: (context, state) =>
-            ScaffoldMessenger.of(context)
-                .showSnackBar(SnackBar(content: Text(state.failure!.message))),
-        builder: (context, state) => RefreshIndicator(
-          onRefresh: cubit.refresh,
-          child: NotificationListener<ScrollNotification>(
-            // Pide la siguiente página antes de llegar al final.
-            onNotification: (notification) {
-              if (notification.metrics.extentAfter < 400) {
-                cubit.loadMore();
-              }
-              return false;
-            },
-            child: CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              slivers: [
-                SliverPadding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  sliver: SliverList.list(
-                    children: [
-                      if (account != null) _BalanceHeader(account: account!),
-                      _CategoryFilters(selected: state.category),
-                      if (state.isStale) ...[
-                        const SizedBox(height: AppSpacing.sm),
-                        StaleDataBanner(
-                          updatedAt: state.cachedAt,
-                          onRetry: cubit.refresh,
-                        ),
-                      ],
+      body: TransactionsView(account: account),
+    );
+  }
+}
+
+/// Lista de movimientos sin `Scaffold`: scroll infinito agrupado por día,
+/// filtro por categoría y pull-to-refresh. La usan la pantalla de una
+/// cuenta y la pestaña Movimientos. Requiere un [TransactionsCubit].
+class TransactionsView extends StatelessWidget {
+  const TransactionsView({this.account, super.key});
+
+  final Account? account;
+
+  @override
+  Widget build(BuildContext context) {
+    final cubit = context.read<TransactionsCubit>();
+
+    return BlocConsumer<TransactionsCubit, TransactionsState>(
+      // Un refresh fallido no tapa la lista: se avisa con un SnackBar.
+      listenWhen: (prev, next) =>
+          next.status == TransactionsStatus.success &&
+          next.failure != null &&
+          prev.failure != next.failure,
+      listener: (context, state) =>
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(state.failure!.message))),
+      builder: (context, state) => RefreshIndicator(
+        onRefresh: cubit.refresh,
+        child: NotificationListener<ScrollNotification>(
+          // Pide la siguiente página antes de llegar al final.
+          onNotification: (notification) {
+            if (notification.metrics.extentAfter < 400) {
+              cubit.loadMore();
+            }
+            return false;
+          },
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                sliver: SliverList.list(
+                  children: [
+                    if (account != null) _BalanceHeader(account: account!),
+                    _CategoryFilters(selected: state.category),
+                    if (state.isStale) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      StaleDataBanner(
+                        updatedAt: state.cachedAt,
+                        onRetry: cubit.refresh,
+                      ),
                     ],
-                  ),
+                  ],
                 ),
-                ..._content(context, state),
-              ],
-            ),
+              ),
+              ..._content(context, state),
+            ],
           ),
         ),
       ),
@@ -103,10 +116,18 @@ class TransactionsPage extends StatelessWidget {
           ),
         ];
       case TransactionsStatus.success when state.items.isEmpty:
-        return const [
+        return [
           SliverFillRemaining(
             hasScrollBody: false,
-            child: Center(child: Text('No hay movimientos para mostrar.')),
+            child: Center(
+              child: EmptyState(
+                icon: Icons.receipt_long_outlined,
+                title: 'No hay movimientos para mostrar',
+                message: state.category == null
+                    ? null
+                    : 'Prueba con otra categoría.',
+              ),
+            ),
           ),
         ];
       case TransactionsStatus.success:
@@ -162,8 +183,10 @@ class _BalanceHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('${account.type.label} ${account.maskedNumber}'),
-          Text(
+          AmountText(
             Formatters.money(account.balanceMinor),
+            hidden: context.watch<BalanceVisibilityCubit>().state,
+            semanticsLabel: 'Saldo disponible',
             style: Theme.of(context).textTheme.headlineMedium,
           ),
         ],

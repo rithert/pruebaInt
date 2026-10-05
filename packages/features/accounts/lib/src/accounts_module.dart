@@ -9,8 +9,10 @@ import 'accounts_routes.dart';
 import 'data/accounts_api_repository.dart';
 import 'domain/accounts_repository.dart';
 import 'domain/models.dart';
+import 'presentation/movements/movements_page.dart';
 import 'presentation/overview/accounts_cubit.dart';
 import 'presentation/overview/accounts_overview_section.dart';
+import 'presentation/privacy/balance_visibility_cubit.dart';
 import 'presentation/transactions/transaction_detail_page.dart';
 import 'presentation/transactions/transactions_cubit.dart';
 import 'presentation/transactions/transactions_page.dart';
@@ -26,13 +28,19 @@ class AccountsModule implements FeatureModule, SduiContributor {
   @override
   void registerDependencies(GetIt di) {
     _di = di;
-    di.registerLazySingleton<AccountsRepository>(
-      () => AccountsApiRepository(
-        api: di<ApiClient>(),
-        fetcher: di<CachedFetcher>(),
-        cache: di<CacheStore>(),
-      ),
-    );
+    di
+      ..registerLazySingleton<AccountsRepository>(
+        () => AccountsApiRepository(
+          api: di<ApiClient>(),
+          fetcher: di<CachedFetcher>(),
+          cache: di<CacheStore>(),
+        ),
+      )
+      // Uno solo para toda la app: el ojo del home y el perfil lo comparten.
+      ..registerLazySingleton<BalanceVisibilityCubit>(
+        () => BalanceVisibilityCubit(store: di<CacheStore>())..load(),
+        dispose: (cubit) => cubit.close(),
+      );
   }
 
   /// Aporta el componente `accounts_summary` al catálogo SDUI: el servidor
@@ -50,6 +58,20 @@ class AccountsModule implements FeatureModule, SduiContributor {
       connectivity: di<ConnectivityMonitor>(),
     )..refresh(),
     child: const AccountsOverviewSection(),
+  );
+
+  /// Pestaña Movimientos autocontenida (con su propio cubit de cuentas).
+  static Widget movements(GetIt di) => BlocProvider(
+    create: (_) => AccountsCubit(
+      repository: di<AccountsRepository>(),
+      connectivity: di<ConnectivityMonitor>(),
+    )..refresh(),
+    child: MovementsPage(
+      transactionsFor: (accountId) => TransactionsCubit(
+        repository: di<AccountsRepository>(),
+        accountId: accountId,
+      )..load(),
+    ),
   );
 
   @override

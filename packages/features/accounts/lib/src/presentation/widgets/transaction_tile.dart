@@ -37,14 +37,11 @@ class TransactionTile extends StatelessWidget {
         ),
         title: Text(tx.title, maxLines: 1, overflow: TextOverflow.ellipsis),
         subtitle: Text('$category · ${Formatters.time(tx.bookedAt)}'),
-        trailing: Text(
+        trailing: AmountText(
           amount,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            color: tx.isCredit
-                ? AppColors.creditFor(context)
-                : scheme.onSurface,
-            fontWeight: FontWeight.w600,
-          ),
+          tone: tx.isCredit ? AmountTone.credit : AmountTone.neutral,
+          style: Theme.of(context).textTheme.titleSmall
+              ?.copyWith(color: scheme.onSurface, fontWeight: FontWeight.w600),
         ),
       ),
     );

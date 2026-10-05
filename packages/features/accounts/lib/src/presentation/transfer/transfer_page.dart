@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../domain/formatters.dart';
-import '../widgets/skeleton.dart';
 import 'transfer_cubit.dart';
 
 class TransferPage extends StatelessWidget {

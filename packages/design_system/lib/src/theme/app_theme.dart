@@ -21,12 +21,33 @@ abstract final class AppTheme {
     final shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(AppSpacing.radius),
     );
+    final base = ThemeData(brightness: brightness).textTheme;
+    const strong = TextStyle(fontWeight: FontWeight.w600);
 
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
       materialTapTargetSize: MaterialTapTargetSize.padded,
-      cardTheme: CardThemeData(shape: shape, margin: EdgeInsets.zero),
+      // Títulos con más peso: jerarquía clara sin agregar una fuente propia.
+      textTheme: base.copyWith(
+        headlineMedium: base.headlineMedium?.merge(strong),
+        headlineSmall: base.headlineSmall?.merge(strong),
+        titleLarge: base.titleLarge?.merge(strong),
+        titleMedium: base.titleMedium?.merge(strong),
+      ),
+      appBarTheme: const AppBarTheme(centerTitle: false),
+      // Tarjetas planas con borde suave: se leen igual en claro y oscuro.
+      cardTheme: CardThemeData(
+        elevation: 0,
+        color: scheme.surfaceContainerLow,
+        margin: EdgeInsets.zero,
+        shape: shape.copyWith(side: BorderSide(color: scheme.outlineVariant)),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: scheme.surfaceContainer,
+        indicatorColor: scheme.primaryContainer,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+      ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           minimumSize: const Size.fromHeight(AppSpacing.minTouchTarget),

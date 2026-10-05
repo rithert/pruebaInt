@@ -1,5 +1,6 @@
-import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
+
+import '../tokens/app_spacing.dart';
 
 /// Bloque gris de carga. Se excluye de la semántica: el lector de pantalla
 /// anuncia "Cargando" una sola vez desde el contenedor.
