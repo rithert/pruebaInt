@@ -39,64 +39,65 @@ void main() {
     await bootstrapped.di.reset();
   });
 
-  testWidgets(
-    'FLUJO CRÍTICO: onboarding → home personalizado → movimientos → '
-    'transferencia → logout',
-    (tester) async {
-      await launchApp(tester);
-      final email = uniqueEmail('e2e');
+  testWidgets('FLUJO CRÍTICO: onboarding → home personalizado → movimientos → '
+      'transferencia → logout', (tester) async {
+    await launchApp(tester);
+    final email = uniqueEmail('e2e');
 
-      // 1. Sin sesión, la app abre el login.
-      await pumpUntilFound(tester, find.text('Hola de nuevo'));
-      await tapVisible(tester, find.text('¿Eres nuevo? Crea tu cuenta'));
+    // 1. Sin sesión, la app abre el login.
+    await pumpUntilFound(tester, find.text('Hola de nuevo'));
+    await tapVisible(tester, find.text('¿Eres nuevo? Crea tu cuenta'));
 
-      // 2. Onboarding en 3 pasos (contra el BFF real).
-      await pumpUntilFound(tester, find.text('Cuéntanos de ti'));
-      await enterField(tester, 'Nombre completo', 'Erika Tester');
-      await enterField(tester, 'Correo', email);
-      await tapVisible(tester, find.text('Continuar'));
+    // 2. Onboarding en 3 pasos (contra el BFF real).
+    await pumpUntilFound(tester, find.text('Cuéntanos de ti'));
+    await enterField(tester, 'Nombre completo', 'Erika Tester');
+    await enterField(tester, 'Correo', email);
+    await tapVisible(tester, find.text('Continuar'));
 
-      await pumpUntilFound(tester, find.text('¿Cuál es tu objetivo?'));
-      await tapVisible(tester, find.text('Ahorrar para una meta'));
-      await tapVisible(tester, find.text('Continuar'));
+    await pumpUntilFound(tester, find.text('¿Cuál es tu objetivo?'));
+    await tapVisible(tester, find.text('Ahorrar para una meta'));
+    await tapVisible(tester, find.text('Continuar'));
 
-      await pumpUntilFound(tester, find.text('Crea tu acceso'));
-      await enterField(tester, 'Contraseña', 'Segura123');
-      await tapVisible(tester, find.text('Acepto los términos y condiciones'));
-      await tapVisible(tester, find.text('Crear cuenta'));
+    await pumpUntilFound(tester, find.text('Crea tu acceso'));
+    await enterField(tester, 'Contraseña', 'Segura123');
+    await tapVisible(tester, find.text('Acepto los términos y condiciones'));
+    await tapVisible(tester, find.text('Crear cuenta'));
 
-      // 3. Home personalizado por el servidor: saludo con el nombre y
-      //    resumen de cuentas con datos reales.
-      await pumpUntilFound(tester, find.textContaining(', Erika'));
-      await pumpUntilFound(tester, find.text('Saldo total'));
-      expect(find.text('Cuenta de ahorros'), findsWidgets);
-      expect(find.text('Bolsillo de metas'), findsOneWidget);
+    // 3. Home personalizado por el servidor: saludo con el nombre y
+    //    resumen de cuentas con datos reales.
+    await pumpUntilFound(tester, find.textContaining(', Erika'));
+    await pumpUntilFound(tester, find.text('Saldo total'));
+    expect(find.text('Cuenta de ahorros'), findsWidgets);
+    expect(find.text('Bolsillo de metas'), findsOneWidget);
 
-      // 4. Movimientos de la cuenta y su detalle.
-      await tapVisible(tester, find.text('Cuenta de ahorros'));
-      await pumpUntilFound(tester, find.text('Todos'));
-      await pumpUntilFound(tester, find.byType(ListTile));
-      await tapVisible(tester, find.byType(ListTile));
-      await pumpUntilFound(tester, find.text('Saldo después'));
-      await tester.pageBack();
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pageBack();
-      await pumpUntilFound(tester, find.text('Saldo total'));
+    // 4. Movimientos de la cuenta y su detalle.
+    await tapVisible(tester, find.text('Cuenta de ahorros'));
+    await pumpUntilFound(tester, find.text('Todos'));
+    await pumpUntilFound(tester, find.byType(ListTile));
+    await tapVisible(tester, find.byType(ListTile));
+    await pumpUntilFound(tester, find.text('Saldo después'));
+    await tester.pageBack();
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pageBack();
+    await pumpUntilFound(tester, find.text('Saldo total'));
 
-      // 5. Transferencia entre cuentas propias.
-      await tapVisible(tester, find.text('Transferir entre mis cuentas'));
-      await pumpUntilFound(tester, find.text('Monto (USD)'));
-      await enterField(tester, 'Monto (USD)', '10');
-      await tapVisible(tester, find.text(r'Transferir $10,00'));
-      await pumpUntilFound(tester, find.text(r'Transferiste $10,00'));
-      await tapVisible(tester, find.text('Listo'));
+    // 5. Transferencia entre cuentas propias.
+    await tapVisible(tester, find.text('Transferir entre mis cuentas'));
+    await pumpUntilFound(tester, find.text('Monto (USD)'));
+    await enterField(tester, 'Monto (USD)', '10');
+    await tapVisible(tester, find.text(r'Transferir $10,00'));
+    await pumpUntilFound(tester, find.text(r'Transferiste $10,00'));
+    await tapVisible(tester, find.text('Listo'));
 
-      // 6. Cerrar sesión vuelve al login.
-      await pumpUntilFound(tester, find.byTooltip('Cerrar sesión'));
-      await tapVisible(tester, find.byTooltip('Cerrar sesión'));
-      await pumpUntilFound(tester, find.text('Hola de nuevo'));
-    },
-  );
+    // 6. Ocultar saldos desde el home y cerrar sesión desde Perfil.
+    await pumpUntilFound(tester, find.byTooltip('Ocultar saldos'));
+    await tapVisible(tester, find.byTooltip('Ocultar saldos'));
+    await pumpUntilFound(tester, find.byTooltip('Mostrar saldos'));
+    await tapVisible(tester, find.text('Perfil'));
+    await pumpUntilFound(tester, find.text('Cerrar sesión'));
+    await tapVisible(tester, find.text('Cerrar sesión'));
+    await pumpUntilFound(tester, find.text('Hola de nuevo'));
+  });
 
   testWidgets(
     'DEGRADADO: con el servicio de experiencia caído, el home usa el layout '

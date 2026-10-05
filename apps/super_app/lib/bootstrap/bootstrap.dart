@@ -5,6 +5,7 @@ import 'package:accounts/accounts.dart';
 import 'package:auth/auth.dart';
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:home/home.dart';
 import 'package:mini_apps/mini_apps.dart';
@@ -98,7 +99,16 @@ Future<BootstrappedApp> bootstrap({
   unawaited(session.restore());
 
   return BootstrappedApp(
-    SuperApp(router: router, session: session, messengerKey: messengerKey),
+    SuperApp(
+      router: router,
+      session: session,
+      messengerKey: messengerKey,
+      providers: [
+        BlocProvider<BalanceVisibilityCubit>.value(
+          value: di<BalanceVisibilityCubit>(),
+        ),
+      ],
+    ),
     di,
   );
 }
