@@ -32,12 +32,12 @@ melos:
       run: dart analyze --fatal-infos .
     format:
       description: Formatea el código fuente de todos los paquetes.
-      run: dart format apps/super_app/lib apps/super_app/test packages
+      run: dart format apps/super_app/lib apps/super_app/test apps/super_app/integration_test packages
     format:check:
       description: Verifica formato sin modificar archivos.
       # Rutas explícitas: `.` recorrería apps/super_app/build (salida de
       # Gradle), cuyas rutas superan el límite de Windows.
-      run: dart format --output=none --set-exit-if-changed apps/super_app/lib apps/super_app/test packages
+      run: dart format --output=none --set-exit-if-changed apps/super_app/lib apps/super_app/test apps/super_app/integration_test packages
     test:
       description: Corre tests de todos los paquetes Flutter que tengan carpeta test/.
       # De a uno: varios `flutter test` en paralelo compiten por el startup
