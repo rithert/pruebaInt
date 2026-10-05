@@ -123,5 +123,5 @@ La configuración del backend está en [backend/.env.example](backend/.env.examp
 - [Decisiones de arquitectura (ADRs)](docs/adr/)
 - [Uso de IA durante el desarrollo](docs/ai-usage.md)
 - Arquitectura y diagramas _(pendiente)_
-- Despliegue y operación _(pendiente)_
-- Resiliencia y escenarios degradados _(pendiente)_
+- [Despliegue y operación: monitoreo, SLOs, alertas y runbook](docs/operations.md)
+- [Resiliencia y escenarios degradados (con guion de demo)](docs/resilience.md)
