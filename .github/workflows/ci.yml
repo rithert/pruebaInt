@@ -51,18 +51,42 @@ jobs:
         run: |
           flutter pub get
           dart pub global activate melos 8.9.0
+          # En CI no hay .fvm: melos usa el SDK que instaló la action.
+          echo "MELOS_SDK_PATH=$FLUTTER_ROOT" >> "$GITHUB_ENV"
       - name: Formato
         run: melos run format:check
       - name: Análisis estático
         run: dart analyze --fatal-infos .
       - name: Tests (unitarios y de widgets) con cobertura
         run: melos run test --no-select
-        env:
-          MELOS_SDK_PATH: ${{ env.FLUTTER_ROOT }}
       - uses: actions/upload-artifact@v4
         with:
           name: coverage
           path: '**/coverage/lcov.info'
+
+  android:
+    # Compila el APK SIN google-services.json: prueba que el repo es
+    # reproducible sin credenciales (Firebase queda deshabilitado).
+    needs: flutter
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: .fvmrc
+          cache: true
+      - run: flutter pub get
+      - name: APK de desarrollo
+        working-directory: apps/super_app
+        run: flutter build apk --debug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: super-app-debug-apk
+          path: apps/super_app/build/app/outputs/flutter-apk/app-debug.apk
 
   backend:
     needs: changes
@@ -83,3 +107,20 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+
+  backend-image:
+    # La imagen de producción arranca, responde /health y NO expone el chaos.
+    needs: backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t fintech-bff:ci backend
+      - name: Smoke test del contenedor
+        run: |
+          docker run -d --name bff -p 3000:3000 \
+            -e JWT_SECRET=ci-secret-0123456789abcdef0123456789 \
+            -e ADMIN_KEY=ci-admin fintech-bff:ci
+          for i in $(seq 1 20); do curl -fs localhost:3000/health && break; sleep 1; done
+          curl -fs localhost:3000/health
+          test "$(curl -s -o /dev/null -w '%{http_code}' -H 'x-admin-key: ci-admin' localhost:3000/admin/chaos)" = "404"
+          docker logs bff
