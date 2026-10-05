@@ -6,3 +6,4 @@ export 'src/data/mini_apps_repository.dart';
 export 'src/domain/mini_app.dart';
 export 'src/mini_apps_module.dart';
 export 'src/presentation/mini_app_cubit.dart';
+export 'src/presentation/services_page.dart';

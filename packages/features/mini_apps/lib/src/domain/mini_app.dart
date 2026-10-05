@@ -5,11 +5,15 @@ class MiniAppDefinition {
     required this.id,
     required this.title,
     required this.entryUrl,
+    this.description = '',
   });
 
   final String id;
   final String title;
   final Uri entryUrl;
+
+  /// Qué ofrece, para el catálogo de servicios.
+  final String description;
 
   /// `scheme://host:port` de la mini app.
   String get origin => entryUrl.origin;
@@ -20,6 +24,7 @@ Map<String, MiniAppDefinition> miniAppCatalog(String baseUrl) => {
   'credit-simulator': MiniAppDefinition(
     id: 'credit-simulator',
     title: 'Simulador de crédito',
+    description: 'Calcula tu cuota antes de solicitar un crédito.',
     entryUrl: Uri.parse('$baseUrl/credit-simulator/'),
   ),
 };

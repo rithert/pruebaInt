@@ -8,6 +8,7 @@ import 'data/mini_apps_repository.dart';
 import 'domain/mini_app.dart';
 import 'presentation/mini_app_cubit.dart';
 import 'presentation/mini_app_page.dart';
+import 'presentation/services_page.dart';
 
 class MiniAppsModule implements FeatureModule {
   /// [firstName] lo aporta el shell (sesión) para personalizar la mini app
@@ -25,6 +26,12 @@ class MiniAppsModule implements FeatureModule {
       () => MiniAppsRepository(di<ApiClient>()),
     );
   }
+
+  /// Pestaña Servicios con el catálogo del entorno.
+  static Widget services(GetIt di) => ServicesPage(
+    catalog: miniAppCatalog(di<AppEnvironment>().miniAppsBaseUrl).values
+        .toList(),
+  );
 
   @override
   List<RouteBase> routes(GetIt di) => [
